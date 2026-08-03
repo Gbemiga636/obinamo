@@ -16,7 +16,7 @@ function buildIcs() {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Obinamo//Wedding//EN",
+    "PRODID:-//Obinasom//Wedding//EN",
     "BEGIN:VEVENT",
     `DTSTART:${start}`,
     `DTEND:${end}`,
@@ -36,7 +36,7 @@ export function ShareActions() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "obinamo-wedding.ics";
+    a.download = "Obinasom-wedding.ics";
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -45,7 +45,7 @@ export function ShareActions() {
     const url = typeof window !== "undefined" ? window.location.origin : "";
     const text = `You're invited to ${wedding.bride.display} & ${wedding.groom.display}'s wedding — ${wedding.date.display}, ${wedding.venue.name}`;
     if (navigator.share) {
-      await navigator.share({ title: "Obinamo Wedding", text, url });
+      await navigator.share({ title: "Obinasom Wedding", text, url });
       return;
     }
     window.open(

@@ -15,7 +15,7 @@ export function LogoMark({
   return (
     <Image
       src="/images/logo.png"
-      alt="PV — Obinamo"
+      alt="PV — Obinasom"
       width={size}
       height={size}
       priority={priority}

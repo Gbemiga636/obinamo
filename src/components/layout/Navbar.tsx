@@ -52,10 +52,10 @@ export function Navbar() {
         )}
       >
         <nav className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:px-8">
-          <Link href="/" className="shrink-0" aria-label="Obinamo home">
+          <Link href="/" className="shrink-0" aria-label="Obinasom home">
             <Image
               src="/images/logo.png"
-              alt="Obinamo"
+              alt="Obinasom"
               width={34}
               height={34}
               className="rounded-full object-cover"

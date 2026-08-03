@@ -13,7 +13,7 @@ export function GuestbookSection() {
 
   useEffect(() => {
     try {
-      setWishes(JSON.parse(localStorage.getItem("obinamo-wishes") || "[]"));
+      setWishes(JSON.parse(localStorage.getItem("Obinasom-wishes") || "[]"));
     } catch {
       setWishes([]);
     }
@@ -27,7 +27,7 @@ export function GuestbookSection() {
       ...wishes,
     ].slice(0, 40);
     setWishes(next);
-    localStorage.setItem("obinamo-wishes", JSON.stringify(next));
+    localStorage.setItem("Obinasom-wishes", JSON.stringify(next));
     setName("");
     setNote("");
   };

@@ -26,7 +26,7 @@ const greatVibes = Great_Vibes({
 
 export const metadata: Metadata = {
   metadataBase: new URL("http://localhost:3000"),
-  title: "Princess Munachi-Obinna & Victor Obinna Chibuzo | Obinamo",
+  title: "Princess Munachi-Obinna & Victor Obinna Chibuzo | Obinasom",
   description:
     "A luxury digital wedding invitation for Princess Munachi-Obinna and Victor Obinna Chibuzo.",
 };

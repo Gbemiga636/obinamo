@@ -71,7 +71,7 @@ export function SiteFooter() {
           </div>
 
           <p className="font-script text-[2.75rem] leading-none text-champagne sm:text-5xl">
-            Obinamo
+            Obinasom
           </p>
 
           <div className="mt-4 flex items-center gap-2.5 text-blush/80">
@@ -148,7 +148,7 @@ export function SiteFooter() {
           </p>
           <p className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-blush/40">
             <Heart className="h-3 w-3 text-soft-gold/50" strokeWidth={1.5} />
-            {wedding.monogram} · Obinamo
+            {wedding.monogram} · Obinasom
           </p>
         </div>
       </div>

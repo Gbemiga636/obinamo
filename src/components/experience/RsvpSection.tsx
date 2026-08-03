@@ -28,8 +28,8 @@ export function RsvpSection() {
       message,
       at: new Date().toISOString(),
     };
-    const prev = JSON.parse(localStorage.getItem("obinamo-rsvps") || "[]") as unknown[];
-    localStorage.setItem("obinamo-rsvps", JSON.stringify([...prev, payload]));
+    const prev = JSON.parse(localStorage.getItem("Obinasom-rsvps") || "[]") as unknown[];
+    localStorage.setItem("Obinasom-rsvps", JSON.stringify([...prev, payload]));
     setSent(true);
   };
 

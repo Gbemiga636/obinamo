@@ -42,7 +42,7 @@ export const wedding = {
     { name: "Dusty Blue", hex: "#6C7D8F" },
     { name: "Champagne", hex: "#E8D5A3" },
   ],
-  hashtag: "#ObinamoForever",
+  hashtag: "#ObinasomForever",
   rsvpDeadline: "October 20, 2026",
   typewriterLines: [
     "With joyful hearts…",
@@ -143,7 +143,7 @@ export const wedding = {
   gallery: [
     { src: "/images/sample.jpeg", alt: "Welcome design inspiration" },
     { src: "/images/sample-2.jpeg", alt: "Save the date inspiration" },
-    { src: "/images/logo.png", alt: "Obinamo monogram" },
+    { src: "/images/logo.png", alt: "Obinasom monogram" },
     { src: "/images/flowers/bloom-left.png", alt: "Floral detail" },
   ],
 } as const;

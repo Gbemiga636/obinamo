@@ -22,7 +22,7 @@ type SoundContextValue = {
 export type SoundName = "seal" | "paper" | "sparkle" | "type";
 
 const SoundContext = createContext<SoundContextValue | null>(null);
-const STORAGE_KEY = "obinamo-sound-muted";
+const STORAGE_KEY = "Obinasom-sound-muted";
 
 export function SoundProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(true);

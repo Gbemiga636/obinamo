@@ -1,4 +1,4 @@
-# Obinamo
+# Obinasom
 
 Luxury digital wedding invitation for Princess Munachi-Obinna & Victor Obinna Chibuzo.
 
@@ -16,6 +16,6 @@ Update `src/lib/wedding.ts` for names, date, venue, dress code, and typewriter l
 
 ## Notes
 
-- First visit shows a sealed invitation gate (stored in `localStorage` as `obinamo-invitation-unlocked`).
+- First visit shows a sealed invitation gate (stored in `localStorage` as `Obinasom-invitation-unlocked`).
 - Clear that key to replay the entrance.
 - Sound is muted by default; use the floating speaker control.
