@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { easeOutExpo, viewportOnce } from "@/lib/motion";
+import { easeSmooth, viewportOnce } from "@/lib/motion";
 import { GoldFlourish, GoldHeart, GoldDiamond } from "@/components/ui/GoldOrnaments";
 import { TypewriterText } from "@/components/ui/TypewriterText";
 import { Float } from "@/components/ui/Reveal";
@@ -86,7 +86,7 @@ export function SectionShell({
         initial={reduce ? false : { opacity: 0, x: -40 }}
         whileInView={{ opacity: 0.35, x: 0 }}
         viewport={viewportOnce}
-        transition={{ duration: 1.2, ease: easeOutExpo }}
+        transition={{ duration: 1.45, ease: easeSmooth }}
       />
       <motion.div
         className="pointer-events-none absolute -right-24 bottom-1/4 h-52 w-52 rounded-full opacity-25 blur-3xl"
@@ -94,7 +94,7 @@ export function SectionShell({
         initial={reduce ? false : { opacity: 0, x: 40 }}
         whileInView={{ opacity: 0.28, x: 0 }}
         viewport={viewportOnce}
-        transition={{ duration: 1.2, delay: 0.15, ease: easeOutExpo }}
+        transition={{ duration: 1.45, delay: 0.12, ease: easeSmooth }}
       />
 
       <div
@@ -106,10 +106,10 @@ export function SectionShell({
         {(eyebrow || title || subtitle) && (
           <header className="mx-auto mb-12 max-w-2xl text-center md:mb-16">
             <motion.div
-              initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+              initial={reduce ? false : { opacity: 0, scale: 0.94 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={viewportOnce}
-              transition={{ duration: 0.8, ease: easeOutExpo }}
+              transition={{ duration: 1.15, ease: easeSmooth }}
             >
               <GoldFlourish />
             </motion.div>
@@ -117,10 +117,10 @@ export function SectionShell({
             {eyebrow ? (
               <motion.p
                 className="type-eyebrow mt-6 text-dusty-blue"
-                initial={reduce ? false : { opacity: 0, y: -16 }}
+                initial={reduce ? false : { opacity: 0, y: -10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={viewportOnce}
-                transition={{ duration: 0.7, delay: 0.1, ease: easeOutExpo }}
+                transition={{ duration: 1, delay: 0.08, ease: easeSmooth }}
               >
                 {eyebrow}
               </motion.p>
@@ -130,10 +130,10 @@ export function SectionShell({
               reduce || !typewriterTitle ? (
                 <motion.h2
                   className="type-display mt-4 text-[clamp(1.75rem,4vw,2.75rem)]"
-                  initial={reduce ? false : { opacity: 0, y: 20 }}
+                  initial={reduce ? false : { opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={viewportOnce}
-                  transition={{ duration: 0.9, delay: 0.15, ease: easeOutExpo }}
+                  transition={{ duration: 1.15, delay: 0.12, ease: easeSmooth }}
                 >
                   {title}
                 </motion.h2>
@@ -143,8 +143,8 @@ export function SectionShell({
                   as="h2"
                   className="type-display mt-4 min-h-[1.2em] text-[clamp(1.75rem,4vw,2.75rem)]"
                   whenInView
-                  delay={180}
-                  speed={48}
+                  delay={160}
+                  speed={38}
                   showCursor
                 />
               )
@@ -153,10 +153,10 @@ export function SectionShell({
             {subtitle ? (
               <motion.p
                 className="type-body mx-auto mt-4 max-w-lg text-balance"
-                initial={reduce ? false : { opacity: 0, y: 18 }}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={viewportOnce}
-                transition={{ duration: 0.9, delay: 0.35, ease: easeOutExpo }}
+                transition={{ duration: 1.15, delay: 0.28, ease: easeSmooth }}
               >
                 {subtitle}
               </motion.p>
@@ -167,7 +167,7 @@ export function SectionShell({
               initial={reduce ? false : { scaleX: 0, opacity: 0 }}
               whileInView={{ scaleX: 1, opacity: 1 }}
               viewport={viewportOnce}
-              transition={{ duration: 0.8, delay: 0.45, ease: easeOutExpo }}
+              transition={{ duration: 1.1, delay: 0.35, ease: easeSmooth }}
               style={{ transformOrigin: "center" }}
             />
           </header>

@@ -5,11 +5,12 @@ import {
   motion,
   useScroll,
   useTransform,
+  useSpring,
   useReducedMotion,
 } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
-import { easeOutExpo } from "@/lib/motion";
+import { easeSmooth } from "@/lib/motion";
 
 type Side = "left" | "right";
 
@@ -67,19 +68,26 @@ export function FloralSide({
 
   const endScale = isMobile ? MOBILE_FLOWERS.finalScale : 1.14;
 
-  const driftY = useTransform(
+  const driftYRaw = useTransform(
     scrollYProgress,
     [0, 1],
-    reduce ? [0, 0] : side === "left" ? [10, -22] : [6, -18],
+    reduce ? [0, 0] : side === "left" ? [8, -16] : [5, -12],
   );
+
+  const driftY = useSpring(driftYRaw, {
+    stiffness: 45,
+    damping: 28,
+    mass: 0.9,
+    restDelta: 0.001,
+  });
 
   const src =
     side === "left"
       ? "/images/flowers/bloom-right.png"
       : "/images/flowers/bloom-left.png";
 
-  const tiltOut = side === "left" ? -26 : 26;
-  const tiltIn = side === "left" ? -7 : 7;
+  const tiltOut = side === "left" ? -18 : 18;
+  const tiltIn = side === "left" ? -5 : 5;
 
   const mobileVars = {
     "--fm-bottom": `${MOBILE_FLOWERS.bottomPercent}%`,
@@ -125,24 +133,24 @@ export function FloralSide({
             ? false
             : {
                 opacity: 0,
-                scale: 0.42,
-                x: side === "left" ? -110 : 110,
-                y: 60,
+                scale: 0.55,
+                x: side === "left" ? -70 : 70,
+                y: 40,
                 rotate: tiltOut,
               }
         }
         animate={{
           opacity: 1,
-          scale: reduce ? 1 : [0.42, 0.75, endScale],
+          scale: reduce ? 1 : [0.55, 0.88, endScale],
           x: 0,
           y: 0,
-          rotate: reduce ? tiltIn : [tiltOut, tiltOut * 0.45, tiltIn],
+          rotate: reduce ? tiltIn : [tiltOut, tiltOut * 0.35, tiltIn],
         }}
         transition={{
-          duration: 1.85,
+          duration: 2.4,
           delay: introDelay,
-          ease: easeOutExpo,
-          times: reduce ? undefined : [0, 0.45, 1],
+          ease: easeSmooth,
+          times: reduce ? undefined : [0, 0.5, 1],
         }}
       >
         <div

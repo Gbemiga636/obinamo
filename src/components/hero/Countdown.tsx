@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { wedding } from "@/lib/wedding";
-import { easeOutExpo, viewportOnce } from "@/lib/motion";
+import { easeSmooth, viewportOnce } from "@/lib/motion";
 
 type TimeLeft = {
   days: number;
@@ -65,7 +65,7 @@ export function Countdown() {
               opacity: 1,
               y: 0,
               x: 0,
-              transition: { duration: 0.75, ease: easeOutExpo },
+              transition: { duration: 0.75, ease: easeSmooth },
             },
           }}
         >
@@ -79,7 +79,7 @@ export function Countdown() {
                 }
                 animate={{ y: 0, opacity: 1 }}
                 exit={reduce ? undefined : { y: -14, opacity: 0 }}
-                transition={{ duration: 0.28, ease: easeOutExpo }}
+                transition={{ duration: 0.28, ease: easeSmooth }}
               >
                 {String(item.value).padStart(2, "0")}
               </motion.div>

@@ -3,7 +3,7 @@
 import { SectionShell } from "@/components/layout/SectionShell";
 import { wedding } from "@/lib/wedding";
 import { motion, useReducedMotion } from "framer-motion";
-import { staggerAltSides, easeOutExpo, viewportOnce } from "@/lib/motion";
+import { staggerAltSides, easeSmooth, viewportOnce } from "@/lib/motion";
 import { TypewriterText } from "@/components/ui/TypewriterText";
 
 export function StorySection() {
@@ -40,7 +40,7 @@ export function StorySection() {
               initial={reduce ? false : { scale: 0 }}
               whileInView={{ scale: 1 }}
               viewport={viewportOnce}
-              transition={{ delay: 0.2 + i * 0.15, duration: 0.5, ease: easeOutExpo }}
+              transition={{ delay: 0.2 + i * 0.15, duration: 0.85, ease: easeSmooth }}
             />
 
             <motion.p
@@ -48,7 +48,7 @@ export function StorySection() {
               initial={reduce ? false : { opacity: 0, x: i % 2 ? 20 : -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={viewportOnce}
-              transition={{ delay: 0.15 + i * 0.12, duration: 0.7, ease: easeOutExpo }}
+              transition={{ delay: 0.15 + i * 0.12, duration: 1.05, ease: easeSmooth }}
             >
               {chapter.year}
             </motion.p>
@@ -74,7 +74,7 @@ export function StorySection() {
               initial={reduce ? false : { opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={viewportOnce}
-              transition={{ delay: 0.35 + i * 0.1, duration: 0.85, ease: easeOutExpo }}
+              transition={{ delay: 0.35 + i * 0.1, duration: 1.15, ease: easeSmooth }}
             >
               {chapter.body}
             </motion.p>

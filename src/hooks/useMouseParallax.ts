@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLenis } from "lenis/react";
 
 export function useMouseParallax(strength = 20) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -18,13 +19,21 @@ export function useMouseParallax(strength = 20) {
   return offset;
 }
 
+/** Scroll Y synced with Lenis for smooth nav / UI (falls back to window) */
 export function useScrollY() {
   const [y, setY] = useState(0);
+
+  useLenis((lenis) => {
+    setY((prev) => {
+      const next = lenis.scroll;
+      if (Math.abs(next - prev) < 1.5) return prev;
+      return next;
+    });
+  });
+
   useEffect(() => {
-    const onScroll = () => setY(window.scrollY);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    setY(window.scrollY || 0);
   }, []);
+
   return y;
 }

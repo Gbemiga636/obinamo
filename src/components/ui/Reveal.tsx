@@ -2,7 +2,7 @@
 
 import { motion, useReducedMotion, type HTMLMotionProps } from "framer-motion";
 import type { ReactNode } from "react";
-import { easeOutExpo, viewportOnce } from "@/lib/motion";
+import { easeSmooth, viewportOnce } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type From = "left" | "right" | "up" | "down" | "scale" | "fade";
@@ -11,11 +11,11 @@ const offsets: Record<
   From,
   { x?: number; y?: number; scale?: number; opacity?: number }
 > = {
-  left: { x: -52, opacity: 0 },
-  right: { x: 52, opacity: 0 },
-  up: { y: 36, opacity: 0 },
-  down: { y: -36, opacity: 0 },
-  scale: { scale: 0.86, opacity: 0 },
+  left: { x: -28, opacity: 0 },
+  right: { x: 28, opacity: 0 },
+  up: { y: 22, opacity: 0 },
+  down: { y: -18, opacity: 0 },
+  scale: { scale: 0.94, opacity: 0 },
   fade: { opacity: 0 },
 };
 
@@ -26,14 +26,17 @@ type Props = {
   duration?: number;
   className?: string;
   once?: boolean;
-} & Omit<HTMLMotionProps<"div">, "children" | "initial" | "animate" | "whileInView">;
+} & Omit<
+  HTMLMotionProps<"div">,
+  "children" | "initial" | "animate" | "whileInView"
+>;
 
-/** Scroll-triggered reveal from a direction */
+/** Scroll-triggered reveal — soft travel, long glide */
 export function Reveal({
   children,
   from = "up",
   delay = 0,
-  duration = 0.95,
+  duration = 1.25,
   className,
   once = true,
   ...rest
@@ -46,8 +49,8 @@ export function Reveal({
       className={cn(className)}
       initial={reduce ? false : hidden}
       whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-      viewport={once ? viewportOnce : { once: false, margin: "-70px" }}
-      transition={{ duration, delay, ease: easeOutExpo }}
+      viewport={once ? viewportOnce : { once: false, margin: "-10%" }}
+      transition={{ duration, delay, ease: easeSmooth }}
       {...rest}
     >
       {children}
@@ -55,12 +58,12 @@ export function Reveal({
   );
 }
 
-/** Soft perpetual float — elegant, not shaky */
+/** Soft perpetual float — vertical only, no wobbly rotate */
 export function Float({
   children,
   className,
-  amplitude = 8,
-  duration = 5.5,
+  amplitude = 6,
+  duration = 6.5,
   delay = 0,
 }: {
   children: ReactNode;
@@ -73,11 +76,7 @@ export function Float({
   return (
     <motion.div
       className={className}
-      animate={
-        reduce
-          ? undefined
-          : { y: [0, -amplitude, 0], rotate: [0, 1.2, -1.2, 0] }
-      }
+      animate={reduce ? undefined : { y: [0, -amplitude, 0] }}
       transition={{
         duration,
         delay,

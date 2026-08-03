@@ -19,7 +19,7 @@ import { LogoMark } from "@/components/ui/LogoMark";
 import { ComingSoonModal } from "@/components/layout/ComingSoonModal";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { wedding } from "@/lib/wedding";
-import { easeOutExpo } from "@/lib/motion";
+import { easeSmooth } from "@/lib/motion";
 
 const FLOATING = [
   { kind: "heart" as const, size: 14, x: "8%", y: "22%", delay: 0.6, dur: 5.2 },
@@ -107,7 +107,7 @@ export function HeroSection() {
           className="relative mx-auto w-full max-w-[min(100%,440px)] text-center sm:max-w-[480px]"
           initial={reduce ? false : { opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.05, ease: easeOutExpo }}
+          transition={{ duration: 1.35, ease: easeSmooth }}
         >
           {/* Gold arch — wider on mobile so names fit inside */}
           <div className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0">
@@ -117,9 +117,9 @@ export function HeroSection() {
           <div className="relative px-5 pt-7 sm:px-8 sm:pt-10">
             <motion.div
               className="mx-auto mb-5 flex justify-center"
-              initial={reduce ? false : { opacity: 0, scale: 0.85 }}
+              initial={reduce ? false : { opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.1, ease: easeOutExpo }}
+              transition={{ duration: 1.25, delay: 0.12, ease: easeSmooth }}
             >
               <div className="rounded-full border border-soft-gold/45 bg-paper/70 p-1 shadow-[var(--shadow-md)] backdrop-blur-[2px]">
                 <LogoMark size={52} className="h-12 w-12 sm:h-14 sm:w-14" priority />
@@ -137,8 +137,8 @@ export function HeroSection() {
                   text="Welcome to our"
                   as="p"
                   className="type-eyebrow"
-                  delay={420}
-                  speed={46}
+                  delay={500}
+                  speed={40}
                   onDone={() => setStep(1)}
                   showCursor
                   active
@@ -186,7 +186,7 @@ export function HeroSection() {
                 className="mt-6"
                 initial={reduce ? false : { opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: easeOutExpo }}
+                transition={{ duration: 1.2, ease: easeSmooth }}
                 onAnimationComplete={() => setStep(4)}
               >
                 <p className="font-display text-[11px] font-bold uppercase tracking-[0.32em] text-caramel sm:text-xs">
@@ -223,7 +223,7 @@ export function HeroSection() {
                 className="relative z-40 mt-7 space-y-4"
                 initial={reduce ? false : { opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.85, ease: easeOutExpo }}
+                transition={{ duration: 0.85, ease: easeSmooth }}
               >
                 <GoldHeartDivider />
 
@@ -266,7 +266,7 @@ export function HeroSection() {
         animate={
           step >= 4 || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
         }
-        transition={{ duration: 1, ease: easeOutExpo }}
+        transition={{ duration: 1, ease: easeSmooth }}
       >
         <div
           className="relative px-6 py-9 text-center sm:py-11"

@@ -39,7 +39,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       </AnimatePresence>
 
       <div
-        className={`relative min-h-screen transition-opacity duration-[1100ms] ease-out ${
+        className={`relative min-h-screen transition-opacity duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${
           unlocked ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >

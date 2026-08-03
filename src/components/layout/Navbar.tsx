@@ -45,7 +45,7 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "fixed inset-x-0 top-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
           compact || open
             ? "h-16 border-b border-[var(--line)] bg-ivory/90 shadow-[var(--shadow-sm)] backdrop-blur-xl"
             : "h-16 bg-transparent md:h-[72px]",
