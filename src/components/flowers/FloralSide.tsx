@@ -10,7 +10,6 @@ import {
 } from "framer-motion";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
-import { easeSmooth } from "@/lib/motion";
 
 type Side = "left" | "right";
 
@@ -35,19 +34,21 @@ export const MOBILE_FLOWERS = {
 };
 
 /**
- * Sample-style florals: tilt in from each side, then bloom.
- * Mobile uses MOBILE_FLOWERS above; desktop stays large.
+ * Sample-style florals — silky spring entrance (no stepped keyframes).
  */
 export function FloralSide({
   side,
   className,
-  introDelay = 0.2,
+  introDelay = 0.25,
   tuckBehindBand = false,
+  active = true,
 }: {
   side: Side;
   className?: string;
   introDelay?: number;
   tuckBehindBand?: boolean;
+  /** Gate animation until experience unlocks */
+  active?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -66,18 +67,18 @@ export function FloralSide({
     offset: ["start end", "end start"],
   });
 
-  const endScale = isMobile ? MOBILE_FLOWERS.finalScale : 1.14;
+  const endScale = isMobile ? MOBILE_FLOWERS.finalScale : 1.1;
 
   const driftYRaw = useTransform(
     scrollYProgress,
     [0, 1],
-    reduce ? [0, 0] : side === "left" ? [8, -16] : [5, -12],
+    reduce ? [0, 0] : side === "left" ? [4, -10] : [3, -8],
   );
 
   const driftY = useSpring(driftYRaw, {
-    stiffness: 45,
-    damping: 28,
-    mass: 0.9,
+    stiffness: 35,
+    damping: 32,
+    mass: 1.05,
     restDelta: 0.001,
   });
 
@@ -86,8 +87,8 @@ export function FloralSide({
       ? "/images/flowers/bloom-right.png"
       : "/images/flowers/bloom-left.png";
 
-  const tiltOut = side === "left" ? -18 : 18;
-  const tiltIn = side === "left" ? -5 : 5;
+  const tiltOut = side === "left" ? -12 : 12;
+  const tiltIn = side === "left" ? -4 : 4;
 
   const mobileVars = {
     "--fm-bottom": `${MOBILE_FLOWERS.bottomPercent}%`,
@@ -97,20 +98,18 @@ export function FloralSide({
     "--fm-side": `${MOBILE_FLOWERS.sideNudge}%`,
   } as CSSProperties;
 
+  const ready = active && !reduce;
+
   return (
     <motion.div
       ref={ref}
       className={cn(
-        "pointer-events-none absolute select-none",
+        "pointer-events-none absolute select-none will-change-transform",
         tuckBehindBand ? "z-[10] md:z-[30]" : "z-[10] md:z-[45]",
-
-        /* ── Mobile knobs (via CSS vars from MOBILE_FLOWERS) ── */
         "max-sm:bottom-[var(--fm-bottom)] max-sm:h-[var(--fm-height)] max-sm:w-[var(--fm-width)] max-sm:max-w-[var(--fm-max-w)]",
         side === "left"
           ? "max-sm:left-[var(--fm-side)]"
           : "max-sm:right-[var(--fm-side)]",
-
-        /* ── Tablet+ ── */
         "sm:bottom-[14%] sm:h-[62vh] sm:w-[46vw] sm:max-w-[300px]",
         tuckBehindBand
           ? "md:bottom-[-28px] md:h-[min(88vh,820px)] md:w-[min(56vw,580px)] md:max-w-none md:translate-y-0 lg:-translate-y-6"
@@ -124,7 +123,7 @@ export function FloralSide({
       aria-hidden
     >
       <motion.div
-        className="relative h-full w-full origin-bottom"
+        className="relative h-full w-full origin-bottom will-change-transform"
         style={{
           transformOrigin: side === "left" ? "left bottom" : "right bottom",
         }}
@@ -133,45 +132,49 @@ export function FloralSide({
             ? false
             : {
                 opacity: 0,
-                scale: 0.55,
-                x: side === "left" ? -70 : 70,
-                y: 40,
+                scale: 0.72,
+                x: side === "left" ? -48 : 48,
+                y: 28,
                 rotate: tiltOut,
               }
         }
-        animate={{
-          opacity: 1,
-          scale: reduce ? 1 : [0.55, 0.88, endScale],
-          x: 0,
-          y: 0,
-          rotate: reduce ? tiltIn : [tiltOut, tiltOut * 0.35, tiltIn],
-        }}
-        transition={{
-          duration: 2.4,
-          delay: introDelay,
-          ease: easeSmooth,
-          times: reduce ? undefined : [0, 0.5, 1],
-        }}
+        animate={
+          ready || reduce
+            ? {
+                opacity: 1,
+                scale: endScale,
+                x: 0,
+                y: 0,
+                rotate: tiltIn,
+              }
+            : {
+                opacity: 0,
+                scale: 0.72,
+                x: side === "left" ? -48 : 48,
+                y: 28,
+                rotate: tiltOut,
+              }
+        }
+        transition={
+          reduce
+            ? { duration: 0 }
+            : {
+                type: "spring",
+                stiffness: 38,
+                damping: 26,
+                mass: 1.15,
+                delay: introDelay,
+              }
+        }
       >
         <div
           className={cn(
-            "absolute bottom-[8%] h-[48%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(226,194,184,0.45),transparent_70%)] blur-2xl",
+            "absolute bottom-[8%] h-[48%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(226,194,184,0.35),transparent_70%)] blur-2xl",
             side === "left" ? "left-0" : "right-0",
           )}
         />
-        <div className="absolute inset-0 opacity-35 blur-md sm:blur-xl">
-          <Image
-            src={src}
-            alt=""
-            fill
-            sizes="(max-width:640px) 44vw, 560px"
-            className={cn(
-              "object-contain",
-              side === "left" ? "object-left-bottom" : "object-right-bottom",
-            )}
-          />
-        </div>
-        <div className="absolute inset-0 drop-shadow-[0_22px_44px_rgba(42,29,18,0.3)]">
+        {/* Single image layer — dual blur stacks caused entrance jank */}
+        <div className="absolute inset-0 drop-shadow-[0_18px_36px_rgba(42,29,18,0.22)]">
           <Image
             src={src}
             alt=""

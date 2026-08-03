@@ -79,7 +79,7 @@ export function Countdown() {
                 }
                 animate={{ y: 0, opacity: 1 }}
                 exit={reduce ? undefined : { y: -14, opacity: 0 }}
-                transition={{ duration: 0.28, ease: easeSmooth }}
+                transition={{ duration: 0.45, ease: easeSmooth }}
               >
                 {String(item.value).padStart(2, "0")}
               </motion.div>
