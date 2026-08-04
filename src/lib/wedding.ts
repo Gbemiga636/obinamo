@@ -151,11 +151,11 @@ export const wedding = {
 export const navItems = [
   { label: "Home", href: "/", live: true },
   { label: "Save The Date", href: "/save-the-date", live: true },
-  { label: "The Day", href: "/the-day", live: false },
   { label: "Schedule", href: "/schedule", live: false },
+  { label: "Wedding Party", href: "/wedding-party", live: false },
   { label: "Gallery", href: "/gallery", live: false },
-  { label: "Travel", href: "/travel", live: false },
   { label: "RSVP", href: "/rsvp", live: false },
   { label: "Registry", href: "/registry", live: false },
-  { label: "FAQs", href: "/faqs", live: false },
+  { label: "Travel/Hotels", href: "/travel", live: false },
+  { label: "Things to Do/FAQs", href: "/faqs", live: false },
 ] as const;
