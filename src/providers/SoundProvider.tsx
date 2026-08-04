@@ -42,6 +42,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const mutedRef = useRef(true);
+  const primedRef = useRef(false);
 
   useEffect(() => {
     mutedRef.current = muted;
@@ -52,6 +53,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     mutedRef.current = true;
     const audio = new Audio("/sounds/ambient.mp3");
     audio.preload = "auto";
+    audio.setAttribute("playsinline", "true");
+    audio.setAttribute("webkit-playsinline", "true");
     audio.loop = false;
     audio.volume = 0.32;
     audioRef.current = audio;
@@ -73,11 +76,26 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     return ctxRef.current;
   }, []);
 
+  /** iOS Safari can leave play() pending forever — never await bare play(). */
+  const playWithTimeout = useCallback(
+    (audio: HTMLAudioElement, ms = 1200) =>
+      Promise.race([
+        audio.play().then(() => true),
+        new Promise<boolean>((resolve) => {
+          window.setTimeout(() => resolve(false), ms);
+        }),
+      ]).catch(() => false),
+    [],
+  );
+
   const primeAudio = useCallback(async () => {
     const ctx = ensureCtx();
     if (ctx?.state === "suspended") {
       try {
-        await ctx.resume();
+        await Promise.race([
+          ctx.resume(),
+          new Promise<void>((r) => window.setTimeout(r, 400)),
+        ]);
       } catch {
         /* ignore */
       }
@@ -88,15 +106,18 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       // Silent play/pause unlocks media autoplay on many browsers
       const prev = audio.volume;
       audio.volume = 0.001;
-      await audio.play();
+      const started = await playWithTimeout(audio, 800);
       audio.pause();
       audio.currentTime = 0;
       audio.volume = prev || 0.32;
-      setPrimed(true);
+      if (started) {
+        primedRef.current = true;
+        setPrimed(true);
+      }
     } catch {
       /* still blocked until a clearer gesture */
     }
-  }, [ensureCtx]);
+  }, [ensureCtx, playWithTimeout]);
 
   const pauseAmbient = useCallback(() => {
     mutedRef.current = true;
@@ -121,23 +142,28 @@ export function SoundProvider({ children }: { children: ReactNode }) {
 
   const startExperienceAudio = useCallback(async () => {
     await primeAudio();
-    mutedRef.current = false;
-    setMuted(false);
     setUnlocked(true);
-    localStorage.setItem(STORAGE_KEY, "0");
 
     const audio = audioRef.current;
-    if (!audio) return primed;
+    if (!audio) return primedRef.current;
 
     try {
       audio.volume = 0.32;
-      await audio.play();
-      setPrimed(true);
-      return true;
+      const started = await playWithTimeout(audio, 1500);
+      if (started && !audio.paused) {
+        mutedRef.current = false;
+        setMuted(false);
+        localStorage.setItem(STORAGE_KEY, "0");
+        primedRef.current = true;
+        setPrimed(true);
+        return true;
+      }
+      // Keep muted if autoplay was blocked — caller can show a tap fallback
+      return false;
     } catch {
       return false;
     }
-  }, [primeAudio, primed]);
+  }, [primeAudio, playWithTimeout]);
 
   const play = useCallback(
     (name: SoundName) => {

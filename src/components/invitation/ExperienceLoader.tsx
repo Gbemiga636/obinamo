@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { useSound } from "@/providers/SoundProvider";
@@ -10,17 +10,24 @@ import { easeSmooth } from "@/lib/motion";
 const PARTICLE_COUNT = 36;
 
 /**
- * Creative experience loader — assembling particles, filling heart,
- * orbiting rings, monogram bloom. Starts music on finish (with gesture fallback).
+ * Creative experience loader — never blocks unlock on iOS autoplay.
+ * Timeline is restart-safe under React Strict Mode (dev).
  */
 export function ExperienceLoader() {
   const { beginUnlock, completeUnlock } = useInvitation();
-  const { startExperienceAudio, primeAudio } = useSound();
+  const { startExperienceAudio, primeAudio, pauseAmbient } = useSound();
   const reduce = useReducedMotion();
   const [phase, setPhase] = useState<
     "assemble" | "fill" | "bloom" | "done" | "tap"
   >("assemble");
   const [progress, setProgress] = useState(0);
+
+  const startAudioRef = useRef(startExperienceAudio);
+  const completeRef = useRef(completeUnlock);
+  const pauseRef = useRef(pauseAmbient);
+  startAudioRef.current = startExperienceAudio;
+  completeRef.current = completeUnlock;
+  pauseRef.current = pauseAmbient;
 
   const particles = useMemo(
     () =>
@@ -40,67 +47,123 @@ export function ExperienceLoader() {
     [],
   );
 
-  // Any touch/click during the loader primes audio for autoplay at the end
   useEffect(() => {
     const onPrime = () => {
       void primeAudio();
     };
     window.addEventListener("pointerdown", onPrime, { once: true });
+    window.addEventListener("touchstart", onPrime, {
+      once: true,
+      passive: true,
+    });
     window.addEventListener("keydown", onPrime, { once: true });
     return () => {
       window.removeEventListener("pointerdown", onPrime);
+      window.removeEventListener("touchstart", onPrime);
       window.removeEventListener("keydown", onPrime);
     };
   }, [primeAudio]);
 
   useEffect(() => {
+    // Framer returns null until preference is known — wait so we don't
+    // start timers then cancel them on the null → false transition.
+    if (reduce === null) return;
+
     beginUnlock();
+    let cancelled = false;
+    const timers: number[] = [];
+
+    setPhase("assemble");
+    setProgress(0);
+
+    const showTap = () => {
+      if (cancelled) return;
+      setPhase("tap");
+    };
+
+    const finish = async () => {
+      if (cancelled) return;
+      setPhase("done");
+
+      let ok = false;
+      try {
+        ok = await Promise.race([
+          startAudioRef.current().catch(() => false),
+          new Promise<boolean>((resolve) => {
+            timers.push(window.setTimeout(() => resolve(false), 1200));
+          }),
+        ]);
+      } catch {
+        ok = false;
+      }
+
+      if (cancelled) return;
+
+      if (ok) {
+        timers.push(
+          window.setTimeout(() => {
+            if (!cancelled) completeRef.current();
+          }, 400),
+        );
+      } else {
+        showTap();
+      }
+    };
+
+    // Absolute failsafe: always offer a way in, then force-enter if needed
+    timers.push(window.setTimeout(showTap, 6500));
+    timers.push(
+      window.setTimeout(() => {
+        if (!cancelled) completeRef.current();
+      }, 12000),
+    );
 
     if (reduce) {
       setProgress(1);
       setPhase("bloom");
-      const t = window.setTimeout(async () => {
-        setPhase("done");
-        await startExperienceAudio();
-        completeUnlock();
-      }, 400);
-      return () => window.clearTimeout(t);
+      timers.push(window.setTimeout(() => void finish(), 280));
+    } else {
+      timers.push(window.setTimeout(() => setPhase("fill"), 1100));
+      timers.push(window.setTimeout(() => setPhase("bloom"), 2400));
+
+      timers.push(
+        window.setTimeout(() => {
+          const start = performance.now();
+          const tick = (now: number) => {
+            if (cancelled) return;
+            const p = Math.min(1, (now - start) / 1300);
+            setProgress(p);
+            if (p < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }, 1100),
+      );
+
+      timers.push(window.setTimeout(() => void finish(), 3600));
     }
 
-    const fillStart = window.setTimeout(() => setPhase("fill"), 1200);
-    const bloomStart = window.setTimeout(() => setPhase("bloom"), 2600);
-
-    const fillTimer = window.setTimeout(() => {
-      const start = performance.now();
-      const tick = (now: number) => {
-        const p = Math.min(1, (now - start) / 1400);
-        setProgress(p);
-        if (p < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-    }, 1200);
-
-    const done = window.setTimeout(async () => {
-      setPhase("done");
-      const ok = await startExperienceAudio();
-      if (ok) {
-        window.setTimeout(() => completeUnlock(), 650);
-      } else {
-        setPhase("tap");
-      }
-    }, 4200);
-
     return () => {
-      window.clearTimeout(fillStart);
-      window.clearTimeout(bloomStart);
-      window.clearTimeout(done);
-      window.clearTimeout(fillTimer);
+      cancelled = true;
+      timers.forEach((id) => window.clearTimeout(id));
     };
-  }, [reduce, beginUnlock, completeUnlock, startExperienceAudio]);
+  }, [reduce, beginUnlock]);
 
   const enterWithMusic = async () => {
-    await startExperienceAudio();
-    completeUnlock();
+    try {
+      await Promise.race([
+        startAudioRef.current().catch(() => false),
+        new Promise<boolean>((resolve) => {
+          window.setTimeout(() => resolve(false), 1500);
+        }),
+      ]);
+    } finally {
+      completeRef.current();
+    }
+  };
+
+  const enterQuietly = () => {
+    pauseRef.current();
+    completeRef.current();
   };
 
   return (
@@ -123,7 +186,6 @@ export function ExperienceLoader() {
       />
 
       <div className="relative z-10 flex h-[280px] w-[280px] items-center justify-center sm:h-[320px] sm:w-[320px]">
-        {/* Orbiting twin rings */}
         <motion.div
           className="absolute inset-[18%] rounded-full border border-soft-gold/35"
           animate={{ rotate: 360 }}
@@ -135,17 +197,24 @@ export function ExperienceLoader() {
           transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
         />
 
-        {/* Assembling particles */}
         {particles.map((p) => (
           <motion.span
             key={p.id}
             className="absolute left-1/2 top-1/2 rounded-full bg-soft-gold"
-            style={{ width: p.size, height: p.size, marginLeft: -p.size / 2, marginTop: -p.size / 2 }}
+            style={{
+              width: p.size,
+              height: p.size,
+              marginLeft: -p.size / 2,
+              marginTop: -p.size / 2,
+            }}
             initial={{ x: p.fromX, y: p.fromY, opacity: 0, scale: 0 }}
             animate={{
               x: phase === "assemble" ? [p.fromX, p.toX] : p.toX * 0.2,
               y: phase === "assemble" ? [p.fromY, p.toY] : p.toY * 0.2,
-              opacity: phase === "bloom" || phase === "done" || phase === "tap" ? 0 : [0, 1, 0.85],
+              opacity:
+                phase === "bloom" || phase === "done" || phase === "tap"
+                  ? 0
+                  : [0, 1, 0.85],
               scale: phase === "assemble" ? [0, 1] : 0.6,
             }}
             transition={{
@@ -156,7 +225,6 @@ export function ExperienceLoader() {
           />
         ))}
 
-        {/* Filling heart */}
         <motion.div
           className="relative z-[2]"
           initial={{ opacity: 0, scale: 0.7 }}
@@ -169,17 +237,22 @@ export function ExperienceLoader() {
           <HeartFill progress={progress} />
         </motion.div>
 
-        {/* PV monogram bloom */}
         <motion.div
           className="absolute z-[3] rounded-full border border-soft-gold/50 bg-paper/90 p-1.5 shadow-[0_12px_40px_rgba(42,29,18,0.18)]"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{
-            opacity: phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
-            scale: phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0.5,
+            opacity:
+              phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
+            scale:
+              phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0.5,
           }}
           transition={{ type: "spring", stiffness: 60, damping: 16 }}
         >
-          <LogoMark size={72} className="h-16 w-16 sm:h-[72px] sm:w-[72px]" priority />
+          <LogoMark
+            size={72}
+            className="h-16 w-16 sm:h-[72px] sm:w-[72px]"
+            priority
+          />
         </motion.div>
       </div>
 
@@ -187,7 +260,8 @@ export function ExperienceLoader() {
         className="relative z-10 mt-10 font-script text-4xl text-cognac sm:text-5xl"
         initial={{ opacity: 0, y: 10 }}
         animate={{
-          opacity: phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
+          opacity:
+            phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
           y: phase === "bloom" || phase === "done" || phase === "tap" ? 0 : 10,
         }}
         transition={{ duration: 1, ease: easeSmooth }}
@@ -198,24 +272,37 @@ export function ExperienceLoader() {
       <motion.p
         className="type-eyebrow relative z-10 mt-4 text-dusty-blue"
         initial={{ opacity: 0 }}
-        animate={{ opacity: phase === "assemble" || phase === "fill" ? 1 : 0.55 }}
+        animate={{
+          opacity: phase === "assemble" || phase === "fill" ? 1 : 0.55,
+        }}
       >
         {phase === "tap" ? "Music needs a gentle touch" : "Assembling our welcome"}
       </motion.p>
 
       <AnimatePresence>
         {phase === "tap" ? (
-          <motion.button
-            type="button"
-            onClick={() => void enterWithMusic()}
-            className="btn-primary relative z-10 mt-8 min-w-[220px]"
+          <motion.div
+            className="relative z-10 mt-8 flex flex-col items-center gap-3 px-6"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7, ease: easeSmooth }}
           >
-            Enter with music
-          </motion.button>
+            <button
+              type="button"
+              onClick={() => void enterWithMusic()}
+              className="btn-primary min-w-[220px]"
+            >
+              Enter with music
+            </button>
+            <button
+              type="button"
+              onClick={enterQuietly}
+              className="btn-ghost min-w-[220px]"
+            >
+              Continue without music
+            </button>
+          </motion.div>
         ) : null}
       </AnimatePresence>
     </motion.div>
