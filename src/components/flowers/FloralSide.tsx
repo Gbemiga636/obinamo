@@ -9,14 +9,16 @@ type Side = "left" | "right";
 
 /**
  * 🌸 MOBILE FLOWER KNOBS — edit these until it looks perfect on your phone.
+ * Flowers stay behind the welcome band; raise `bottomPercent` so only the
+ * bottoms tuck under the gold strip.
  */
 export const MOBILE_FLOWERS = {
-  bottomPercent: 4,
-  heightVh: 48,
-  widthVw: 46,
-  maxWidthPx: 180,
-  sideNudge: -9,
-  finalScale: 1.05,
+  bottomPercent: 22,
+  heightVh: 52,
+  widthVw: 48,
+  maxWidthPx: 190,
+  sideNudge: -10,
+  finalScale: 1.06,
 };
 
 /**
@@ -71,8 +73,8 @@ export function FloralSide({
     <div
       className={cn(
         "pointer-events-none absolute select-none",
-        // Mobile: sit above the welcome band; desktop can tuck behind it
-        tuckBehindBand ? "z-[45] md:z-[30]" : "z-[45] md:z-[45]",
+        // Always behind the welcome band; bottoms tuck under, tops stay visible
+        tuckBehindBand ? "z-[10] md:z-[30]" : "z-[10] md:z-[45]",
         "max-sm:bottom-[var(--fm-bottom)] max-sm:h-[var(--fm-height)] max-sm:w-[var(--fm-width)] max-sm:max-w-[var(--fm-max-w)]",
         side === "left"
           ? "max-sm:left-[var(--fm-side)]"
