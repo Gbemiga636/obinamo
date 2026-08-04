@@ -26,7 +26,7 @@ export function InvitationProvider({ children }: { children: ReactNode }) {
   const [unlocking, setUnlocking] = useState(false);
 
   useEffect(() => {
-    // Envelope entrance every visit
+    // Creative loader on every visit
     setUnlocked(false);
     setReady(true);
   }, []);

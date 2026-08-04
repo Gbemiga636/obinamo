@@ -6,60 +6,148 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
+  type MutableRefObject,
 } from "react";
 
 type SoundContextValue = {
   muted: boolean;
   unlocked: boolean;
+  /** True after a user gesture primed the audio element */
+  primed: boolean;
   toggleMuted: () => void;
-  /** Unmute + mark audio ready (call from user gesture) */
-  startExperienceAudio: () => void;
+  /** Soft-prime from any loader interaction (gesture) */
+  primeAudio: () => Promise<void>;
+  /** Pause ambient immediately (e.g. entering Save The Date) */
+  pauseAmbient: () => void;
+  /**
+   * Unmute + try to play ambient.
+   * Returns true if playback started (or was primed successfully).
+   */
+  startExperienceAudio: () => Promise<boolean>;
   play: (name: SoundName) => void;
 };
 
 export type SoundName = "seal" | "paper" | "sparkle" | "type";
 
 const SoundContext = createContext<SoundContextValue | null>(null);
-const STORAGE_KEY = "Obinasom-sound-muted";
+const STORAGE_KEY = "obinasom-sound-muted";
 
 export function SoundProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
+  const [primed, setPrimed] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const ctxRef = useRef<AudioContext | null>(null);
+  const mutedRef = useRef(true);
 
   useEffect(() => {
-    // Start muted each visit until experience begins
+    mutedRef.current = muted;
+  }, [muted]);
+
+  useEffect(() => {
     setMuted(true);
+    mutedRef.current = true;
+    const audio = new Audio("/sounds/ambient.mp3");
+    audio.preload = "auto";
+    audio.loop = false;
+    audio.volume = 0.32;
+    audioRef.current = audio;
+    return () => {
+      audio.pause();
+      audio.src = "";
+      audioRef.current = null;
+    };
+  }, []);
+
+  const ensureCtx = useCallback(() => {
+    if (typeof window === "undefined") return null;
+    const AC =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AC) return null;
+    if (!ctxRef.current) ctxRef.current = new AC();
+    return ctxRef.current;
+  }, []);
+
+  const primeAudio = useCallback(async () => {
+    const ctx = ensureCtx();
+    if (ctx?.state === "suspended") {
+      try {
+        await ctx.resume();
+      } catch {
+        /* ignore */
+      }
+    }
+    const audio = audioRef.current;
+    if (!audio) return;
+    try {
+      // Silent play/pause unlocks media autoplay on many browsers
+      const prev = audio.volume;
+      audio.volume = 0.001;
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      audio.volume = prev || 0.32;
+      setPrimed(true);
+    } catch {
+      /* still blocked until a clearer gesture */
+    }
+  }, [ensureCtx]);
+
+  const pauseAmbient = useCallback(() => {
+    mutedRef.current = true;
+    setMuted(true);
+    localStorage.setItem(STORAGE_KEY, "1");
+    const audio = audioRef.current;
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
   }, []);
 
   const toggleMuted = useCallback(() => {
     setMuted((prev) => {
       const next = !prev;
+      mutedRef.current = next;
       localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
       if (!next) setUnlocked(true);
       return next;
     });
   }, []);
 
-  const startExperienceAudio = useCallback(() => {
+  const startExperienceAudio = useCallback(async () => {
+    await primeAudio();
+    mutedRef.current = false;
     setMuted(false);
     setUnlocked(true);
     localStorage.setItem(STORAGE_KEY, "0");
-  }, []);
+
+    const audio = audioRef.current;
+    if (!audio) return primed;
+
+    try {
+      audio.volume = 0.32;
+      await audio.play();
+      setPrimed(true);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [primeAudio, primed]);
 
   const play = useCallback(
     (name: SoundName) => {
-      if (muted || typeof window === "undefined") return;
+      if (mutedRef.current || typeof window === "undefined") return;
       setUnlocked(true);
 
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      if (!AudioCtx) return;
+      const ctx = ensureCtx();
+      if (!ctx) return;
+      void ctx.resume();
 
-      const ctx = new AudioCtx();
       const now = ctx.currentTime;
       const gain = ctx.createGain();
       gain.connect(ctx.destination);
@@ -109,20 +197,85 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         osc.start(now);
         osc.stop(now + 0.06);
       }
-
-      window.setTimeout(() => void ctx.close(), 800);
     },
-    [muted],
+    [ensureCtx],
   );
 
   const value = useMemo(
-    () => ({ muted, unlocked, toggleMuted, startExperienceAudio, play }),
-    [muted, unlocked, toggleMuted, startExperienceAudio, play],
+    () => ({
+      muted,
+      unlocked,
+      primed,
+      toggleMuted,
+      primeAudio,
+      pauseAmbient,
+      startExperienceAudio,
+      play,
+    }),
+    [
+      muted,
+      unlocked,
+      primed,
+      toggleMuted,
+      primeAudio,
+      pauseAmbient,
+      startExperienceAudio,
+      play,
+    ],
   );
 
   return (
-    <SoundContext.Provider value={value}>{children}</SoundContext.Provider>
+    <SoundContext.Provider value={value}>
+      <AmbientAudioBridge audioRef={audioRef} muted={muted} />
+      {children}
+    </SoundContext.Provider>
   );
+}
+
+/** Keeps early-loop behavior on the shared ambient element */
+function AmbientAudioBridge({
+  audioRef,
+  muted,
+}: {
+  audioRef: MutableRefObject<HTMLAudioElement | null>;
+  muted: boolean;
+}) {
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const LOOP_EARLY = 5;
+    const onTimeUpdate = () => {
+      const duration = audio.duration;
+      if (!Number.isFinite(duration) || duration <= LOOP_EARLY + 1) return;
+      if (audio.currentTime >= duration - LOOP_EARLY) {
+        audio.currentTime = 0;
+        if (!audio.paused) void audio.play().catch(() => undefined);
+      }
+    };
+    const onEnded = () => {
+      audio.currentTime = 0;
+      void audio.play().catch(() => undefined);
+    };
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
+    };
+  }, [audioRef]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (muted) {
+      audio.pause();
+      return;
+    }
+    void audio.play().catch(() => undefined);
+  }, [muted, audioRef]);
+
+  return null;
 }
 
 export function useSound() {

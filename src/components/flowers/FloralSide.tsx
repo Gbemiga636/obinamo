@@ -1,28 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  useReducedMotion,
-} from "framer-motion";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState, type CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
 type Side = "left" | "right";
 
 /**
  * 🌸 MOBILE FLOWER KNOBS — edit these until it looks perfect on your phone.
- * Save the file → page hot-reloads. Only affects screens under 640px.
- *
- *   bottomPercent → lift UP/DOWN from bottom     (try 12 → 28)  ↑ higher number = higher
- *   heightVh      → how tall                     (try 38 → 52)
- *   widthVw       → how wide                     (try 36 → 48)
- *   maxWidthPx    → width cap in pixels          (try 150 → 200)
- *   sideNudge     → push off screen edge         (try -6 → -14; more negative = further out)
- *   finalScale    → ending bloom size            (try 0.95 → 1.15)
  */
 export const MOBILE_FLOWERS = {
   bottomPercent: 11,
@@ -34,7 +20,8 @@ export const MOBILE_FLOWERS = {
 };
 
 /**
- * Sample-style florals — silky spring entrance (no stepped keyframes).
+ * Florals — soft spring entrance only.
+ * Scroll parallax removed — it fought Lenis and made scrolling feel sticky.
  */
 export function FloralSide({
   side,
@@ -47,10 +34,8 @@ export function FloralSide({
   className?: string;
   introDelay?: number;
   tuckBehindBand?: boolean;
-  /** Gate animation until experience unlocks */
   active?: boolean;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -62,33 +47,15 @@ export function FloralSide({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-
-  const endScale = isMobile ? MOBILE_FLOWERS.finalScale : 1.1;
-
-  const driftYRaw = useTransform(
-    scrollYProgress,
-    [0, 1],
-    reduce ? [0, 0] : side === "left" ? [4, -10] : [3, -8],
-  );
-
-  const driftY = useSpring(driftYRaw, {
-    stiffness: 35,
-    damping: 32,
-    mass: 1.05,
-    restDelta: 0.001,
-  });
+  const endScale = isMobile ? MOBILE_FLOWERS.finalScale : 1.08;
 
   const src =
     side === "left"
       ? "/images/flowers/bloom-right.png"
       : "/images/flowers/bloom-left.png";
 
-  const tiltOut = side === "left" ? -12 : 12;
-  const tiltIn = side === "left" ? -4 : 4;
+  const tiltOut = side === "left" ? -10 : 10;
+  const tiltIn = side === "left" ? -3 : 3;
 
   const mobileVars = {
     "--fm-bottom": `${MOBILE_FLOWERS.bottomPercent}%`,
@@ -101,10 +68,9 @@ export function FloralSide({
   const ready = active && !reduce;
 
   return (
-    <motion.div
-      ref={ref}
+    <div
       className={cn(
-        "pointer-events-none absolute select-none will-change-transform",
+        "pointer-events-none absolute select-none",
         tuckBehindBand ? "z-[10] md:z-[30]" : "z-[10] md:z-[45]",
         "max-sm:bottom-[var(--fm-bottom)] max-sm:h-[var(--fm-height)] max-sm:w-[var(--fm-width)] max-sm:max-w-[var(--fm-max-w)]",
         side === "left"
@@ -119,7 +85,7 @@ export function FloralSide({
           : "sm:right-[-6%] md:right-[-2%]",
         className,
       )}
-      style={{ ...mobileVars, y: driftY }}
+      style={mobileVars}
       aria-hidden
     >
       <motion.div
@@ -132,9 +98,9 @@ export function FloralSide({
             ? false
             : {
                 opacity: 0,
-                scale: 0.72,
-                x: side === "left" ? -48 : 48,
-                y: 28,
+                scale: 0.78,
+                x: side === "left" ? -36 : 36,
+                y: 24,
                 rotate: tiltOut,
               }
         }
@@ -149,9 +115,9 @@ export function FloralSide({
               }
             : {
                 opacity: 0,
-                scale: 0.72,
-                x: side === "left" ? -48 : 48,
-                y: 28,
+                scale: 0.78,
+                x: side === "left" ? -36 : 36,
+                y: 24,
                 rotate: tiltOut,
               }
         }
@@ -160,21 +126,20 @@ export function FloralSide({
             ? { duration: 0 }
             : {
                 type: "spring",
-                stiffness: 38,
-                damping: 26,
-                mass: 1.15,
+                stiffness: 42,
+                damping: 28,
+                mass: 1.05,
                 delay: introDelay,
               }
         }
       >
         <div
           className={cn(
-            "absolute bottom-[8%] h-[48%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(226,194,184,0.35),transparent_70%)] blur-2xl",
+            "absolute bottom-[8%] h-[48%] w-[78%] rounded-full bg-[radial-gradient(circle,rgba(226,194,184,0.28),transparent_70%)] blur-2xl",
             side === "left" ? "left-0" : "right-0",
           )}
         />
-        {/* Single image layer — dual blur stacks caused entrance jank */}
-        <div className="absolute inset-0 drop-shadow-[0_18px_36px_rgba(42,29,18,0.22)]">
+        <div className="absolute inset-0 drop-shadow-[0_16px_32px_rgba(42,29,18,0.18)]">
           <Image
             src={src}
             alt=""
@@ -188,6 +153,6 @@ export function FloralSide({
           />
         </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

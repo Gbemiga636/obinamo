@@ -108,6 +108,52 @@ html {
   }
 }
 
+@keyframes petal-fall {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.45;
+  }
+  92% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translate3d(18px, 110vh, 0) rotate(48deg);
+    opacity: 0;
+  }
+}
+
+.petal-fall {
+  animation-name: petal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes soft-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.28;
+  }
+  50% {
+    transform: translate3d(0, -6px, 0);
+    opacity: 0.42;
+  }
+}
+
+.hero-float {
+  animation: soft-float 7.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal-fall,
+  .hero-float {
+    animation: none !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

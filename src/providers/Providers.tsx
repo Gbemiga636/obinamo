@@ -8,7 +8,7 @@ import {
 } from "@/providers/InvitationProvider";
 import { SoundProvider } from "@/providers/SoundProvider";
 import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
-import { InvitationGate } from "@/components/invitation/InvitationGate";
+import { ExperienceLoader } from "@/components/invitation/ExperienceLoader";
 import { Navbar } from "@/components/layout/Navbar";
 import { MusicToggle } from "@/components/ui/MusicToggle";
 import { AmbientMusic } from "@/components/effects/AmbientMusic";
@@ -35,7 +35,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
     <>
       <AmbientMusic />
       <AnimatePresence mode="wait">
-        {!unlocked ? <InvitationGate key="gate" /> : null}
+        {!unlocked ? <ExperienceLoader key="loader" /> : null}
       </AnimatePresence>
 
       <div
@@ -45,7 +45,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       >
         <SmoothScrollProvider>
           <Navbar />
-          {unlocked ? <FallingPetals count={10} /> : null}
+          {unlocked ? <FallingPetals count={5} /> : null}
           <main>{children}</main>
           <SiteFooter />
           <MusicToggle />

@@ -150,7 +150,8 @@ export const wedding = {
 
 export const navItems = [
   { label: "Home", href: "/", live: true },
-  { label: "Save The Date", href: "/save-the-date", live: false },
+  { label: "Save The Date", href: "/save-the-date", live: true },
+  { label: "The Day", href: "/the-day", live: false },
   { label: "Schedule", href: "/schedule", live: false },
   { label: "Gallery", href: "/gallery", live: false },
   { label: "Travel", href: "/travel", live: false },

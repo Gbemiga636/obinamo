@@ -51,7 +51,7 @@ export function HeroSection() {
   return (
     <section className="relative flex min-h-[100svh] flex-col overflow-x-clip">
       <div className="surface-paper absolute inset-0" />
-      <div className="surface-grain absolute inset-0 opacity-70" />
+      <div className="surface-grain absolute inset-0 opacity-40" />
 
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
@@ -61,28 +61,21 @@ export function HeroSection() {
         }}
       />
 
-      {/* Soft ambient floats — opacity + Y only (no rotate jitter) */}
-      {unlocked ? (
+      {/* Soft ambient floats — CSS so they don’t fight scroll */}
+      {unlocked && !reduce ? (
         <div
           className="pointer-events-none absolute inset-0 z-[12] hidden sm:block"
           aria-hidden
         >
           {FLOATING.map((item, i) => (
-            <motion.div
+            <div
               key={i}
-              className="absolute"
-              style={{ left: item.x, top: item.y }}
-              initial={reduce ? false : { opacity: 0 }}
-              animate={
-                reduce
-                  ? { opacity: 0.35 }
-                  : { opacity: [0.2, 0.42, 0.2], y: [0, -6, 0] }
-              }
-              transition={{
-                duration: item.dur,
-                delay: item.delay,
-                repeat: Infinity,
-                ease: "easeInOut",
+              className="hero-float absolute"
+              style={{
+                left: item.x,
+                top: item.y,
+                animationDelay: `${item.delay}s`,
+                animationDuration: `${item.dur}s`,
               }}
             >
               {item.kind === "heart" ? (
@@ -92,7 +85,7 @@ export function HeroSection() {
               ) : (
                 <GoldRing />
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
       ) : null}
@@ -253,16 +246,16 @@ export function HeroSection() {
                   </div>
 
                   <div className="relative z-50 flex flex-col items-center gap-3 pt-3 sm:flex-row sm:justify-center">
+                    <Link href="/save-the-date" className="btn-primary w-full sm:w-auto">
+                      Save The Date
+                    </Link>
                     <button
                       type="button"
                       onClick={() => setSoonOpen(true)}
-                      className="btn-primary w-full sm:w-auto"
+                      className="btn-ghost w-full sm:w-auto"
                     >
-                      Save The Date
+                      The Day
                     </button>
-                    <Link href="#story" className="btn-ghost w-full sm:w-auto">
-                      Our Story
-                    </Link>
                   </div>
                 </motion.div>
               )}
@@ -319,7 +312,7 @@ export function HeroSection() {
 
       <ComingSoonModal
         open={soonOpen}
-        title="Save The Date"
+        title="The Day"
         onClose={() => setSoonOpen(false)}
       />
     </section>
