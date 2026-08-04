@@ -9,7 +9,7 @@ import { Menu, X } from "lucide-react";
 import { useScrollY } from "@/hooks/useMouseParallax";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { ComingSoonModal } from "@/components/layout/ComingSoonModal";
-import { navItems, wedding } from "@/lib/wedding";
+import { navItems } from "@/lib/wedding";
 import { cn } from "@/lib/utils";
 import { easeOutExpo } from "@/lib/motion";
 
@@ -161,7 +161,7 @@ export function Navbar() {
                         <span>{item.label}</span>
                         {!item.live ? (
                           <span className="font-serif text-[10px] font-normal normal-case tracking-normal text-dusty-blue/70">
-                            Soon
+                            Stay tuned
                           </span>
                         ) : null}
                       </Link>
@@ -169,15 +169,6 @@ export function Navbar() {
                   ))}
                 </ul>
               </nav>
-
-              <div className="border-t border-[var(--line)] px-6 py-6 text-center">
-                <p className="type-eyebrow text-[10px] text-dusty-blue">
-                  {wedding.date.display}
-                </p>
-                <p className="mt-1 font-serif text-sm text-ink-soft">
-                  {wedding.venue.name}
-                </p>
-              </div>
             </motion.aside>
           </motion.div>
         ) : null}

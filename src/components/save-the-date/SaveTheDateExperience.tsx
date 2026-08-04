@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { Countdown } from "@/components/hero/Countdown";
 import { useSound } from "@/providers/SoundProvider";
+import { useSaveDateGate } from "@/providers/SaveDateGate";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth } from "@/lib/motion";
 
@@ -22,13 +23,18 @@ type Phase = "sealed" | "opening" | "reveal" | "open";
  */
 export function SaveTheDateExperience() {
   const reduce = useReducedMotion();
-  const { play, startExperienceAudio, pauseAmbient, muted } = useSound();
+  const { play, startExperienceAudio, pauseAmbient } = useSound();
+  const { setEnvelopeOpen } = useSaveDateGate();
   const [phase, setPhase] = useState<Phase>("sealed");
 
   // Stop site music the moment this page opens — it only resumes on seal tap
   useEffect(() => {
     pauseAmbient();
   }, [pauseAmbient]);
+
+  useEffect(() => {
+    if (phase === "open") setEnvelopeOpen(true);
+  }, [phase, setEnvelopeOpen]);
 
   const open = async () => {
     if (phase !== "sealed") return;
@@ -59,19 +65,14 @@ export function SaveTheDateExperience() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, ease: easeSmooth }}
       >
-        <p className="type-eyebrow text-dusty-blue">A sealed invitation</p>
-        <h1 className="mt-3 font-display text-2xl font-bold text-mocha sm:text-3xl">
+        <h1 className="font-display text-2xl font-bold text-mocha sm:text-3xl">
           Save The Date
         </h1>
-        <p className="mt-2 font-serif text-sm text-ink-soft/65">
-          {phase === "sealed"
-            ? "Tap the seal to open"
-            : done
-              ? muted
-                ? "Keep this date close"
-                : "Music playing · keep this date close"
-              : "Opening…"}
-        </p>
+        {phase !== "open" ? (
+          <p className="mt-2 font-serif text-sm text-ink-soft/65">
+            {phase === "sealed" ? "Tap the seal to open" : "Opening…"}
+          </p>
+        ) : null}
       </motion.div>
 
       <div
@@ -274,31 +275,34 @@ export function SaveTheDateExperience() {
         </motion.div>
       </div>
 
-      <motion.p
-        className="relative z-10 mt-4 max-w-sm text-center font-serif text-sm text-ink-soft/55"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: done ? 1 : 0 }}
-        transition={{ duration: 1, delay: 0.4, ease: easeSmooth }}
-      >
-        Formal invitation to follow · {wedding.hashtag}
-      </motion.p>
-
-      <motion.div
-        className="relative z-10 mt-10 w-full max-w-md px-2 text-center sm:mt-12"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.1, delay: 0.25, ease: easeSmooth }}
-      >
-        <p className="type-eyebrow text-[10px] text-cognac sm:text-[11px]">
-          {wedding.date.caps}
-        </p>
-        <p className="type-eyebrow mt-2 text-[10px] text-dusty-blue sm:text-[11px]">
-          {wedding.venue.name}
-        </p>
-        <div className="px-1 pt-5">
-          <Countdown />
-        </div>
-      </motion.div>
+      <AnimatePresence>
+        {done ? (
+          <motion.div
+            className="relative z-10 mt-8 flex w-full max-w-md flex-col items-center px-2 text-center sm:mt-10"
+            initial={
+              reduce
+                ? { opacity: 1 }
+                : { opacity: 0, y: 80, scale: 0.92 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.15, delay: 0.15, ease: easeSmooth }}
+          >
+            <p className="type-eyebrow text-[10px] text-cognac sm:text-[11px]">
+              {wedding.date.caps}
+            </p>
+            <p className="type-eyebrow mt-2 text-[10px] text-dusty-blue sm:text-[11px]">
+              {wedding.venue.name}
+            </p>
+            <div className="w-full px-1 pt-5">
+              <Countdown />
+            </div>
+            <p className="mt-8 max-w-sm font-serif text-sm text-ink-soft/55">
+              Formal invitation to follow · {wedding.hashtag}
+            </p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

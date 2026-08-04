@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { FloralSide } from "@/components/flowers/FloralSide";
@@ -15,7 +14,6 @@ import {
 } from "@/components/ui/GoldOrnaments";
 import { TypewriterText } from "@/components/ui/TypewriterText";
 import { LogoMark } from "@/components/ui/LogoMark";
-import { ComingSoonModal } from "@/components/layout/ComingSoonModal";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth, softSpring } from "@/lib/motion";
@@ -35,7 +33,6 @@ const softIn = {
 
 export function HeroSection() {
   const [step, setStep] = useState(0);
-  const [soonOpen, setSoonOpen] = useState(false);
   const reduce = useReducedMotion();
   const { unlocked } = useInvitation();
 
@@ -227,25 +224,12 @@ export function HeroSection() {
             <AnimatePresence>
               {(step >= 4 || reduce) && (
                 <motion.div
-                  className="relative z-40 mt-7 space-y-4"
+                  className="relative z-40 mt-7"
                   initial={reduce ? false : softIn.initial}
                   animate={softIn.animate}
                   transition={{ duration: 1.4, ease: easeSmooth }}
                 >
                   <GoldHeartDivider />
-
-                  <div className="relative z-50 flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
-                    <Link href="/save-the-date" className="btn-primary w-full sm:w-auto">
-                      Save The Date
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => setSoonOpen(true)}
-                      className="btn-ghost w-full sm:w-auto"
-                    >
-                      The Day
-                    </button>
-                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -298,12 +282,6 @@ export function HeroSection() {
           </p>
         </div>
       </motion.div>
-
-      <ComingSoonModal
-        open={soonOpen}
-        title="The Day"
-        onClose={() => setSoonOpen(false)}
-      />
     </section>
   );
 }

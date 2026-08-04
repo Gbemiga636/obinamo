@@ -42,7 +42,7 @@ export const wedding = {
     { name: "Dusty Blue", hex: "#6C7D8F" },
     { name: "Champagne", hex: "#E8D5A3" },
   ],
-  hashtag: "#ObinasomForever",
+  hashtag: "#Obinasom",
   rsvpDeadline: "October 20, 2026",
   typewriterLines: [
     "With joyful hearts…",

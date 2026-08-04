@@ -17,6 +17,8 @@ type SoundContextValue = {
   unlocked: boolean;
   /** True after a user gesture primed the audio element */
   primed: boolean;
+  /** Autoplay was blocked — next scroll/tap/wheel should start music */
+  awaitingGesture: boolean;
   toggleMuted: () => void;
   /** Soft-prime from any loader interaction (gesture) */
   primeAudio: () => Promise<void>;
@@ -24,9 +26,11 @@ type SoundContextValue = {
   pauseAmbient: () => void;
   /**
    * Unmute + try to play ambient.
-   * Returns true if playback started (or was primed successfully).
+   * Returns true if playback started.
    */
   startExperienceAudio: () => Promise<boolean>;
+  /** Mark that music should start on the next user gesture */
+  awaitGesturePlayback: () => void;
   play: (name: SoundName) => void;
 };
 
@@ -39,10 +43,12 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
   const [primed, setPrimed] = useState(false);
+  const [awaitingGesture, setAwaitingGesture] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const mutedRef = useRef(true);
   const primedRef = useRef(false);
+  const startRef = useRef<() => Promise<boolean>>(async () => false);
 
   useEffect(() => {
     mutedRef.current = muted;
@@ -122,6 +128,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const pauseAmbient = useCallback(() => {
     mutedRef.current = true;
     setMuted(true);
+    setAwaitingGesture(false);
     localStorage.setItem(STORAGE_KEY, "1");
     const audio = audioRef.current;
     if (audio) {
@@ -135,7 +142,10 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       const next = !prev;
       mutedRef.current = next;
       localStorage.setItem(STORAGE_KEY, next ? "1" : "0");
-      if (!next) setUnlocked(true);
+      if (!next) {
+        setUnlocked(true);
+        setAwaitingGesture(false);
+      }
       return next;
     });
   }, []);
@@ -153,17 +163,54 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       if (started && !audio.paused) {
         mutedRef.current = false;
         setMuted(false);
+        setAwaitingGesture(false);
         localStorage.setItem(STORAGE_KEY, "0");
         primedRef.current = true;
         setPrimed(true);
         return true;
       }
-      // Keep muted if autoplay was blocked — caller can show a tap fallback
       return false;
     } catch {
       return false;
     }
   }, [primeAudio, playWithTimeout]);
+
+  startRef.current = startExperienceAudio;
+
+  const awaitGesturePlayback = useCallback(() => {
+    setAwaitingGesture(true);
+  }, []);
+
+  // If autoplay was blocked, start music on the next scroll / tap / wheel / key
+  useEffect(() => {
+    if (!awaitingGesture) return;
+
+    let busy = false;
+    const tryStart = () => {
+      if (busy) return;
+      busy = true;
+      void startRef.current().then((ok) => {
+        busy = false;
+        if (!ok) return;
+        setAwaitingGesture(false);
+      });
+    };
+
+    const opts: AddEventListenerOptions = { capture: true, passive: true };
+    window.addEventListener("pointerdown", tryStart, opts);
+    window.addEventListener("touchstart", tryStart, opts);
+    window.addEventListener("wheel", tryStart, opts);
+    window.addEventListener("scroll", tryStart, opts);
+    window.addEventListener("keydown", tryStart, opts);
+
+    return () => {
+      window.removeEventListener("pointerdown", tryStart, opts);
+      window.removeEventListener("touchstart", tryStart, opts);
+      window.removeEventListener("wheel", tryStart, opts);
+      window.removeEventListener("scroll", tryStart, opts);
+      window.removeEventListener("keydown", tryStart, opts);
+    };
+  }, [awaitingGesture]);
 
   const play = useCallback(
     (name: SoundName) => {
@@ -232,20 +279,24 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       muted,
       unlocked,
       primed,
+      awaitingGesture,
       toggleMuted,
       primeAudio,
       pauseAmbient,
       startExperienceAudio,
+      awaitGesturePlayback,
       play,
     }),
     [
       muted,
       unlocked,
       primed,
+      awaitingGesture,
       toggleMuted,
       primeAudio,
       pauseAmbient,
       startExperienceAudio,
+      awaitGesturePlayback,
       play,
     ],
   );

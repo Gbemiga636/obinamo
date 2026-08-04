@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { useSound } from "@/providers/SoundProvider";
 import { LogoMark } from "@/components/ui/LogoMark";
@@ -10,24 +10,24 @@ import { easeSmooth } from "@/lib/motion";
 const PARTICLE_COUNT = 36;
 
 /**
- * Creative experience loader — never blocks unlock on iOS autoplay.
- * Timeline is restart-safe under React Strict Mode (dev).
+ * Creative loader — visual only. Music autoplays; if blocked,
+ * SoundProvider starts it on the next scroll / tap / wheel.
  */
 export function ExperienceLoader() {
   const { beginUnlock, completeUnlock } = useInvitation();
-  const { startExperienceAudio, primeAudio, pauseAmbient } = useSound();
+  const { startExperienceAudio, primeAudio, awaitGesturePlayback } = useSound();
   const reduce = useReducedMotion();
-  const [phase, setPhase] = useState<
-    "assemble" | "fill" | "bloom" | "done" | "tap"
-  >("assemble");
+  const [phase, setPhase] = useState<"assemble" | "fill" | "bloom" | "done">(
+    "assemble",
+  );
   const [progress, setProgress] = useState(0);
 
   const startAudioRef = useRef(startExperienceAudio);
   const completeRef = useRef(completeUnlock);
-  const pauseRef = useRef(pauseAmbient);
+  const awaitGestureRef = useRef(awaitGesturePlayback);
   startAudioRef.current = startExperienceAudio;
   completeRef.current = completeUnlock;
-  pauseRef.current = pauseAmbient;
+  awaitGestureRef.current = awaitGesturePlayback;
 
   const particles = useMemo(
     () =>
@@ -65,8 +65,6 @@ export function ExperienceLoader() {
   }, [primeAudio]);
 
   useEffect(() => {
-    // Framer returns null until preference is known — wait so we don't
-    // start timers then cancel them on the null → false transition.
     if (reduce === null) return;
 
     beginUnlock();
@@ -75,11 +73,6 @@ export function ExperienceLoader() {
 
     setPhase("assemble");
     setProgress(0);
-
-    const showTap = () => {
-      if (cancelled) return;
-      setPhase("tap");
-    };
 
     const finish = async () => {
       if (cancelled) return;
@@ -98,24 +91,23 @@ export function ExperienceLoader() {
       }
 
       if (cancelled) return;
+      if (!ok) awaitGestureRef.current();
 
-      if (ok) {
-        timers.push(
-          window.setTimeout(() => {
-            if (!cancelled) completeRef.current();
-          }, 400),
-        );
-      } else {
-        showTap();
-      }
+      timers.push(
+        window.setTimeout(() => {
+          if (!cancelled) completeRef.current();
+        }, 400),
+      );
     };
 
-    // Absolute failsafe: always offer a way in, then force-enter if needed
-    timers.push(window.setTimeout(showTap, 6500));
+    // Hard unlock failsafe
     timers.push(
       window.setTimeout(() => {
-        if (!cancelled) completeRef.current();
-      }, 12000),
+        if (!cancelled) {
+          awaitGestureRef.current();
+          completeRef.current();
+        }
+      }, 8000),
     );
 
     if (reduce) {
@@ -148,23 +140,7 @@ export function ExperienceLoader() {
     };
   }, [reduce, beginUnlock]);
 
-  const enterWithMusic = async () => {
-    try {
-      await Promise.race([
-        startAudioRef.current().catch(() => false),
-        new Promise<boolean>((resolve) => {
-          window.setTimeout(() => resolve(false), 1500);
-        }),
-      ]);
-    } finally {
-      completeRef.current();
-    }
-  };
-
-  const enterQuietly = () => {
-    pauseRef.current();
-    completeRef.current();
-  };
+  const showMark = phase === "bloom" || phase === "done";
 
   return (
     <motion.div
@@ -211,10 +187,7 @@ export function ExperienceLoader() {
             animate={{
               x: phase === "assemble" ? [p.fromX, p.toX] : p.toX * 0.2,
               y: phase === "assemble" ? [p.fromY, p.toY] : p.toY * 0.2,
-              opacity:
-                phase === "bloom" || phase === "done" || phase === "tap"
-                  ? 0
-                  : [0, 1, 0.85],
+              opacity: showMark ? 0 : [0, 1, 0.85],
               scale: phase === "assemble" ? [0, 1] : 0.6,
             }}
             transition={{
@@ -241,10 +214,8 @@ export function ExperienceLoader() {
           className="absolute z-[3] rounded-full border border-soft-gold/50 bg-paper/90 p-1.5 shadow-[0_12px_40px_rgba(42,29,18,0.18)]"
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{
-            opacity:
-              phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
-            scale:
-              phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0.5,
+            opacity: showMark ? 1 : 0,
+            scale: showMark ? 1 : 0.5,
           }}
           transition={{ type: "spring", stiffness: 60, damping: 16 }}
         >
@@ -260,51 +231,13 @@ export function ExperienceLoader() {
         className="relative z-10 mt-10 font-script text-4xl text-cognac sm:text-5xl"
         initial={{ opacity: 0, y: 10 }}
         animate={{
-          opacity:
-            phase === "bloom" || phase === "done" || phase === "tap" ? 1 : 0,
-          y: phase === "bloom" || phase === "done" || phase === "tap" ? 0 : 10,
+          opacity: showMark ? 1 : 0,
+          y: showMark ? 0 : 10,
         }}
         transition={{ duration: 1, ease: easeSmooth }}
       >
         Obinasom
       </motion.p>
-
-      <motion.p
-        className="type-eyebrow relative z-10 mt-4 text-dusty-blue"
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity: phase === "assemble" || phase === "fill" ? 1 : 0.55,
-        }}
-      >
-        {phase === "tap" ? "Music needs a gentle touch" : "Assembling our welcome"}
-      </motion.p>
-
-      <AnimatePresence>
-        {phase === "tap" ? (
-          <motion.div
-            className="relative z-10 mt-8 flex flex-col items-center gap-3 px-6"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: easeSmooth }}
-          >
-            <button
-              type="button"
-              onClick={() => void enterWithMusic()}
-              className="btn-primary min-w-[220px]"
-            >
-              Enter with music
-            </button>
-            <button
-              type="button"
-              onClick={enterQuietly}
-              className="btn-ghost min-w-[220px]"
-            >
-              Continue without music
-            </button>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </motion.div>
   );
 }

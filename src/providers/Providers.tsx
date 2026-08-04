@@ -2,24 +2,33 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   InvitationProvider,
   useInvitation,
 } from "@/providers/InvitationProvider";
 import { SoundProvider } from "@/providers/SoundProvider";
 import { SmoothScrollProvider } from "@/providers/SmoothScrollProvider";
+import {
+  SaveDateGateProvider,
+  useSaveDateGate,
+} from "@/providers/SaveDateGate";
 import { ExperienceLoader } from "@/components/invitation/ExperienceLoader";
 import { Navbar } from "@/components/layout/Navbar";
 import { MusicToggle } from "@/components/ui/MusicToggle";
 import { AmbientMusic } from "@/components/effects/AmbientMusic";
 import { FallingPetals } from "@/components/effects/FallingPetals";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { easeSmooth } from "@/lib/motion";
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { ready, unlocked } = useInvitation();
   const pathname = usePathname();
-  const hideFooter = pathname === "/";
+  const { envelopeOpen } = useSaveDateGate();
+
+  const hideFooter =
+    pathname === "/" ||
+    (pathname.startsWith("/save-the-date") && !envelopeOpen);
 
   useEffect(() => {
     document.documentElement.classList.toggle("overflow-hidden", !unlocked);
@@ -50,7 +59,19 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Navbar />
           {unlocked ? <FallingPetals count={5} /> : null}
           <main>{children}</main>
-          {hideFooter ? null : <SiteFooter />}
+          <AnimatePresence>
+            {!hideFooter ? (
+              <motion.div
+                key="site-footer"
+                initial={{ opacity: 0, y: 48 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.05, ease: easeSmooth }}
+              >
+                <SiteFooter />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
           <MusicToggle />
         </SmoothScrollProvider>
       </div>
@@ -62,7 +83,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SoundProvider>
       <InvitationProvider>
-        <AppShell>{children}</AppShell>
+        <SaveDateGateProvider>
+          <AppShell>{children}</AppShell>
+        </SaveDateGateProvider>
       </InvitationProvider>
     </SoundProvider>
   );
