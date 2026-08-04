@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { LogoMark } from "@/components/ui/LogoMark";
+import { Countdown } from "@/components/hero/Countdown";
 import { useSound } from "@/providers/SoundProvider";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth } from "@/lib/motion";
@@ -281,6 +282,23 @@ export function SaveTheDateExperience() {
       >
         Formal invitation to follow · {wedding.hashtag}
       </motion.p>
+
+      <motion.div
+        className="relative z-10 mt-10 w-full max-w-md px-2 text-center sm:mt-12"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.1, delay: 0.25, ease: easeSmooth }}
+      >
+        <p className="type-eyebrow text-[10px] text-cognac sm:text-[11px]">
+          {wedding.date.caps}
+        </p>
+        <p className="type-eyebrow mt-2 text-[10px] text-dusty-blue sm:text-[11px]">
+          {wedding.venue.name}
+        </p>
+        <div className="px-1 pt-5">
+          <Countdown />
+        </div>
+      </motion.div>
     </section>
   );
 }

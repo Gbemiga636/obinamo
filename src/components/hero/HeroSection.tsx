@@ -14,7 +14,6 @@ import {
   LoveBurst,
 } from "@/components/ui/GoldOrnaments";
 import { TypewriterText } from "@/components/ui/TypewriterText";
-import { Countdown } from "@/components/hero/Countdown";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { ComingSoonModal } from "@/components/layout/ComingSoonModal";
 import { useInvitation } from "@/providers/InvitationProvider";
@@ -235,18 +234,7 @@ export function HeroSection() {
                 >
                   <GoldHeartDivider />
 
-                  <p className="type-eyebrow text-[10px] text-cognac sm:text-[11px]">
-                    {wedding.date.caps}
-                  </p>
-                  <p className="type-eyebrow text-[10px] text-dusty-blue sm:text-[11px]">
-                    {wedding.venue.name}
-                  </p>
-
-                  <div className="px-1 pt-1">
-                    <Countdown />
-                  </div>
-
-                  <div className="relative z-50 flex flex-col items-center gap-3 pt-3 sm:flex-row sm:justify-center">
+                  <div className="relative z-50 flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
                     <Link href="/save-the-date" className="btn-primary w-full sm:w-auto">
                       Save The Date
                     </Link>

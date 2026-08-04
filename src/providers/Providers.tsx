@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import {
   InvitationProvider,
@@ -17,6 +18,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 
 function AppShell({ children }: { children: React.ReactNode }) {
   const { ready, unlocked } = useInvitation();
+  const pathname = usePathname();
+  const hideFooter = pathname === "/";
 
   useEffect(() => {
     document.documentElement.classList.toggle("overflow-hidden", !unlocked);
@@ -47,7 +50,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
           <Navbar />
           {unlocked ? <FallingPetals count={5} /> : null}
           <main>{children}</main>
-          <SiteFooter />
+          {hideFooter ? null : <SiteFooter />}
           <MusicToggle />
         </SmoothScrollProvider>
       </div>
