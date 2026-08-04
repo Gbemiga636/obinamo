@@ -92,18 +92,19 @@ export function HeroSection() {
 
       <div className="relative z-30 flex flex-1 flex-col items-center justify-center px-3 pb-36 pt-24 sm:px-14 sm:pb-52 sm:pt-28 md:px-24">
         <motion.div
-          className="relative mx-auto w-full max-w-[min(100%,440px)] text-center sm:max-w-[480px]"
+          className="relative mx-auto w-full max-w-[min(100%,440px)] text-center sm:max-w-[480px] lg:max-w-[600px] lg:min-h-[min(72vh,700px)] lg:flex lg:flex-col lg:justify-center"
           initial={reduce || !unlocked ? false : { opacity: 0, y: 18 }}
           animate={
             unlocked ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }
           }
           transition={{ duration: 1.5, ease: easeSmooth, delay: 0.05 }}
         >
-          <div className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0">
-            <GoldArch className="h-full w-full max-w-none scale-x-[1.08] opacity-90 sm:scale-x-100" />
+          {/* Mobile/sm unchanged; laptop+ matches sample’s tall, roomy arch */}
+          <div className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0 lg:-inset-x-24 lg:-top-14 lg:bottom-[-2.75rem] xl:-inset-x-32 xl:-top-16 xl:bottom-[-3.25rem]">
+            <GoldArch className="h-full w-full max-w-none scale-x-[1.08] opacity-90 sm:scale-x-100 lg:scale-x-[1.02]" />
           </div>
 
-          <div className="relative px-5 pt-7 sm:px-8 sm:pt-10">
+          <div className="relative px-5 pt-7 sm:px-8 sm:pt-10 lg:px-10 lg:pt-14 lg:pb-6">
             <motion.div
               className="mx-auto mb-5 flex justify-center"
               initial={reduce || !unlocked ? false : { opacity: 0, scale: 0.94 }}
