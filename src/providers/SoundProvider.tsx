@@ -38,6 +38,8 @@ export type SoundName = "seal" | "paper" | "sparkle" | "type";
 
 const SoundContext = createContext<SoundContextValue | null>(null);
 const STORAGE_KEY = "obinasom-sound-muted";
+/** Steady ambient level — never ducked mid-play */
+const AMBIENT_VOLUME = 0.32;
 
 export function SoundProvider({ children }: { children: ReactNode }) {
   const [muted, setMuted] = useState(true);
@@ -61,8 +63,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     audio.preload = "auto";
     audio.setAttribute("playsinline", "true");
     audio.setAttribute("webkit-playsinline", "true");
-    audio.loop = false;
-    audio.volume = 0.32;
+    audio.loop = true;
+    audio.volume = AMBIENT_VOLUME;
     audioRef.current = audio;
     return () => {
       audio.pause();
@@ -108,20 +110,27 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     }
     const audio = audioRef.current;
     if (!audio) return;
+
+    // Never duck volume while music is already audible
+    if (!audio.paused && !mutedRef.current) {
+      primedRef.current = true;
+      setPrimed(true);
+      return;
+    }
+
     try {
-      // Silent play/pause unlocks media autoplay on many browsers
-      const prev = audio.volume;
-      audio.volume = 0.001;
+      // Silent unlock only when not currently hearing ambient
+      audio.volume = 0;
       const started = await playWithTimeout(audio, 800);
       audio.pause();
       audio.currentTime = 0;
-      audio.volume = prev || 0.32;
+      audio.volume = AMBIENT_VOLUME;
       if (started) {
         primedRef.current = true;
         setPrimed(true);
       }
     } catch {
-      /* still blocked until a clearer gesture */
+      audio.volume = AMBIENT_VOLUME;
     }
   }, [ensureCtx, playWithTimeout]);
 
@@ -134,6 +143,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
+      audio.volume = AMBIENT_VOLUME;
     }
   }, []);
 
@@ -145,20 +155,30 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       if (!next) {
         setUnlocked(true);
         setAwaitingGesture(false);
+        const audio = audioRef.current;
+        if (audio) audio.volume = AMBIENT_VOLUME;
       }
       return next;
     });
   }, []);
 
   const startExperienceAudio = useCallback(async () => {
+    const audio = audioRef.current;
+
+    // Already playing steadily — don't re-prime (that caused dips)
+    if (audio && !audio.paused && !mutedRef.current) {
+      audio.volume = AMBIENT_VOLUME;
+      setUnlocked(true);
+      return true;
+    }
+
     await primeAudio();
     setUnlocked(true);
 
-    const audio = audioRef.current;
     if (!audio) return primedRef.current;
 
     try {
-      audio.volume = 0.32;
+      audio.volume = AMBIENT_VOLUME;
       const started = await playWithTimeout(audio, 1500);
       if (started && !audio.paused) {
         mutedRef.current = false;
@@ -167,6 +187,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, "0");
         primedRef.current = true;
         setPrimed(true);
+        audio.volume = AMBIENT_VOLUME;
         return true;
       }
       return false;
@@ -309,7 +330,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** Keeps early-loop behavior on the shared ambient element */
+/** Native loop at a fixed volume — no early-seek dips */
 function AmbientAudioBridge({
   audioRef,
   muted,
@@ -320,26 +341,8 @@ function AmbientAudioBridge({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-
-    const LOOP_EARLY = 5;
-    const onTimeUpdate = () => {
-      const duration = audio.duration;
-      if (!Number.isFinite(duration) || duration <= LOOP_EARLY + 1) return;
-      if (audio.currentTime >= duration - LOOP_EARLY) {
-        audio.currentTime = 0;
-        if (!audio.paused) void audio.play().catch(() => undefined);
-      }
-    };
-    const onEnded = () => {
-      audio.currentTime = 0;
-      void audio.play().catch(() => undefined);
-    };
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("ended", onEnded);
-    return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("ended", onEnded);
-    };
+    audio.loop = true;
+    audio.volume = AMBIENT_VOLUME;
   }, [audioRef]);
 
   useEffect(() => {
@@ -349,6 +352,7 @@ function AmbientAudioBridge({
       audio.pause();
       return;
     }
+    audio.volume = AMBIENT_VOLUME;
     void audio.play().catch(() => undefined);
   }, [muted, audioRef]);
 
