@@ -144,8 +144,11 @@ export function AdminDashboard() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {/* Download hits an API route (CSV), not a page */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
             href="/api/obinasom/guests/export"
+            download
             className="inline-flex items-center gap-2 rounded-full border border-soft-gold/40 bg-paper px-3.5 py-2 text-sm text-cognac"
           >
             <Download className="h-4 w-4" />
