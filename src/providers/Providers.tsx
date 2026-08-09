@@ -22,18 +22,25 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { easeSmooth } from "@/lib/motion";
 
 function AppShell({ children }: { children: React.ReactNode }) {
-  const { ready, unlocked } = useInvitation();
+  const { ready, unlocked, completeUnlock } = useInvitation();
   const pathname = usePathname();
   const { envelopeOpen } = useSaveDateGate();
+  const isAdmin = pathname.startsWith("/admin");
 
   const hideFooter =
+    isAdmin ||
     pathname === "/" ||
     (pathname.startsWith("/save-the-date") && !envelopeOpen);
 
   useEffect(() => {
+    if (isAdmin) {
+      completeUnlock();
+      document.documentElement.classList.remove("overflow-hidden");
+      return;
+    }
     document.documentElement.classList.toggle("overflow-hidden", !unlocked);
     return () => document.documentElement.classList.remove("overflow-hidden");
-  }, [unlocked]);
+  }, [unlocked, isAdmin, completeUnlock]);
 
   if (!ready) {
     return (
@@ -41,6 +48,10 @@ function AppShell({ children }: { children: React.ReactNode }) {
         <div className="h-8 w-8 animate-spin rounded-full border border-soft-gold/30 border-t-soft-gold" />
       </div>
     );
+  }
+
+  if (isAdmin) {
+    return <div className="relative min-h-screen">{children}</div>;
   }
 
   return (

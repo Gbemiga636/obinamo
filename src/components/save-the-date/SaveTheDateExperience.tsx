@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { Countdown } from "@/components/hero/Countdown";
+import { GuestDetailsForm } from "@/components/save-the-date/GuestDetailsForm";
 import { useSound } from "@/providers/SoundProvider";
 import { useSaveDateGate } from "@/providers/SaveDateGate";
 import { wedding } from "@/lib/wedding";
@@ -297,6 +298,7 @@ export function SaveTheDateExperience() {
             <div className="w-full px-1 pt-5">
               <Countdown />
             </div>
+            <GuestDetailsForm />
             <p className="mt-8 max-w-sm font-serif text-sm text-ink-soft/55">
               Formal invitation to follow · {wedding.hashtag}
             </p>
