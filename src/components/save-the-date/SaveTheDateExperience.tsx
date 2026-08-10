@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { Countdown } from "@/components/hero/Countdown";
 import { GuestDetailsForm } from "@/components/save-the-date/GuestDetailsForm";
@@ -11,16 +12,14 @@ import { useSaveDateGate } from "@/providers/SaveDateGate";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth } from "@/lib/motion";
 
-const PAPER =
-  "linear-gradient(145deg, #f7eee0 0%, #efe2d0 28%, #e6d5be 62%, #d9c4a5 100%)";
-const PAPER_FLAP =
-  "linear-gradient(180deg, #f3e8d6 0%, #e8d7c0 40%, #dcc7ab 100%)";
+type Phase = "sealed" | "opening" | "open";
 
-type Phase = "sealed" | "opening" | "reveal" | "open";
+const PANEL =
+  "linear-gradient(160deg, #f6eee0 0%, #ead9c2 42%, #dcc4a4 100%)";
 
 /**
- * Save The Date — seal click opens + starts music;
- * invite spins out, envelope drifts away.
+ * Four full-page triangles seal the viewport.
+ * Seal sits in the center; on tap the panels fly outward and the invite fills the view.
  */
 export function SaveTheDateExperience() {
   const reduce = useReducedMotion();
@@ -28,7 +27,6 @@ export function SaveTheDateExperience() {
   const { setEnvelopeOpen } = useSaveDateGate();
   const [phase, setPhase] = useState<Phase>("sealed");
 
-  // Stop site music the moment this page opens — it only resumes on seal tap
   useEffect(() => {
     pauseAmbient();
   }, [pauseAmbient]);
@@ -41,253 +39,253 @@ export function SaveTheDateExperience() {
     if (phase !== "sealed") return;
     setPhase("opening");
 
-    // Gesture unlocks ambient music on this page
     await startExperienceAudio();
     play("seal");
-
-    window.setTimeout(() => play("paper"), reduce ? 60 : 480);
-    window.setTimeout(() => setPhase("reveal"), reduce ? 180 : 850);
-    window.setTimeout(() => play("sparkle"), reduce ? 260 : 1700);
-    window.setTimeout(() => setPhase("open"), reduce ? 450 : 3100);
+    window.setTimeout(() => play("paper"), reduce ? 40 : 320);
+    window.setTimeout(() => play("sparkle"), reduce ? 180 : 900);
+    window.setTimeout(() => setPhase("open"), reduce ? 350 : 1600);
   };
 
-  const opening = phase !== "sealed";
+  const sealed = phase === "sealed";
+  const covering = phase === "sealed" || phase === "opening";
   const done = phase === "open";
-  const cardInteractive = phase === "reveal" || phase === "open";
+  const opening = phase === "opening";
 
   return (
-    <section className="relative flex min-h-[100svh] flex-col items-center overflow-x-clip px-4 pb-28 pt-28">
+    <section className="relative overflow-x-clip">
       <div className="surface-paper absolute inset-0" />
       <div className="surface-grain absolute inset-0" />
 
-      <motion.div
-        className="relative z-10 mb-6 text-center"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, ease: easeSmooth }}
-      >
-        <h1 className="font-display text-2xl font-bold text-mocha sm:text-3xl">
-          Save The Date
-        </h1>
-        {phase !== "open" ? (
-          <p className="mt-2 font-serif text-sm text-ink-soft/65">
-            {phase === "sealed" ? "Tap the seal to open" : "Opening…"}
-          </p>
-        ) : null}
-      </motion.div>
-
+      {/* Invite stage — fills the viewport; peeks a little room for “details below” when open */}
       <div
-        className="relative z-10 mx-auto w-full max-w-[400px] sm:max-w-[460px]"
-        style={{
-          minHeight: done ? 560 : 440,
-          perspective: 1600,
-        }}
+        className={`relative z-10 flex w-full flex-col items-center justify-center px-3 ${
+          done
+            ? "min-h-[88svh] pb-3 pt-[4.25rem] sm:min-h-[90svh] sm:pt-20"
+            : "min-h-[100svh]"
+        }`}
       >
-        {/* Card — pointer-events off until it has emerged */}
+        {/* Invite under the seal (visible as panels open) */}
         <motion.div
-          className={`absolute left-1/2 z-40 w-[82%] max-w-[310px] sm:max-w-[340px] ${
-            cardInteractive ? "pointer-events-auto" : "pointer-events-none"
+          className={`relative z-10 w-full max-w-[min(92vw,440px)] sm:max-w-[500px] ${
+            covering ? "pointer-events-none" : "pointer-events-auto"
           }`}
-          style={{
-            top: done ? 8 : "14%",
-            transformStyle: "preserve-3d",
-          }}
           initial={false}
           animate={
-            reduce && done
-              ? { x: "-50%", y: 0, opacity: 1, rotateY: 0, scale: 1 }
-              : phase === "sealed" || phase === "opening"
-                ? {
-                    x: "-50%",
-                    y: phase === "opening" ? 90 : 130,
-                    opacity: phase === "opening" ? 0.15 : 0,
-                    rotateY: 0,
-                    scale: 0.9,
-                  }
-                : phase === "reveal"
-                  ? {
-                      x: "-50%",
-                      y: -36,
-                      opacity: 1,
-                      rotateY: 360,
-                      scale: 1,
-                    }
-                  : {
-                      x: "-50%",
-                      y: 0,
-                      opacity: 1,
-                      rotateY: 360,
-                      scale: 1.03,
-                    }
+            covering
+              ? {
+                  opacity: opening ? 1 : 0.35,
+                  scale: opening ? 1 : 0.94,
+                  filter: opening ? "blur(0px)" : "blur(2px)",
+                }
+              : { opacity: 1, scale: 1, filter: "blur(0px)" }
           }
-          transition={
-            phase === "reveal"
-              ? { duration: 2.25, ease: easeSmooth }
-              : { duration: 1.15, ease: easeSmooth }
-          }
-          aria-hidden={!cardInteractive}
+          transition={{ duration: 1.1, ease: easeSmooth }}
         >
-          <div
-            className="relative aspect-[3/4] w-full"
-            style={{ transformStyle: "preserve-3d" }}
-          >
-            <div
-              className="absolute inset-0"
-              style={{
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                filter: "drop-shadow(0 24px 40px rgba(42,29,18,0.26))",
-              }}
-            >
-              <Image
-                src="/images/save-the-date.png"
-                alt="Save the Date invitation"
-                fill
-                className="object-contain"
-                sizes="(max-width:640px) 82vw, 340px"
-                priority
-              />
-            </div>
-            <div
-              className="absolute inset-0"
-              style={{
-                transform: "rotateY(180deg)",
-                backfaceVisibility: "hidden",
-                WebkitBackfaceVisibility: "hidden",
-                filter: "drop-shadow(0 24px 40px rgba(42,29,18,0.26))",
-              }}
-            >
-              <Image
-                src="/images/save-the-date.png"
-                alt=""
-                fill
-                className="object-contain"
-                sizes="(max-width:640px) 82vw, 340px"
-                aria-hidden
-              />
-            </div>
+          <div className="relative aspect-[3/4] w-full max-h-[min(78svh,720px)]">
+            <Image
+              src="/images/save-the-date.png"
+              alt="Save the Date invitation"
+              fill
+              className="object-contain drop-shadow-[0_28px_48px_rgba(42,29,18,0.3)]"
+              sizes="(max-width:640px) 92vw, 500px"
+              priority
+            />
           </div>
         </motion.div>
 
-        {/* Envelope */}
-        <motion.div
-          className="absolute inset-x-0 top-[6%] z-20 h-[360px] sm:h-[400px]"
-          animate={
-            done
-              ? { y: 260, opacity: 0, scale: 0.94 }
-              : opening
-                ? { y: 10, opacity: 1, scale: 1 }
-                : { y: [0, -6, 0], opacity: 1, scale: 1 }
-          }
-          transition={
-            done
-              ? { duration: 1.4, ease: easeSmooth, delay: 0.1 }
-              : opening
-                ? { duration: 0.75, ease: easeSmooth }
-                : { duration: 5, repeat: Infinity, ease: "easeInOut" }
-          }
-        >
-          <div className="relative h-full w-full">
-            <div className="absolute -bottom-3 left-[12%] right-[12%] h-9 rounded-[100%] bg-mocha/20 blur-xl" />
-
-            <div
-              className="absolute inset-x-0 bottom-0 top-[16%] overflow-hidden rounded-b-[12px]"
-              style={{
-                background: PAPER,
-                boxShadow:
-                  "0 26px 55px rgba(42,29,18,0.24), inset 0 1px 0 rgba(255,255,255,0.5)",
-              }}
-            >
-              <div className="absolute inset-[5px] border border-[#d4af37]/30" />
-              <div
-                className="absolute inset-x-0 bottom-0 z-[2] h-[46%]"
-                style={{
-                  background: PAPER,
-                  clipPath:
-                    "polygon(0 38%, 50% 0, 100% 38%, 100% 100%, 0 100%)",
-                  boxShadow: "inset 0 14px 22px rgba(42,29,18,0.1)",
-                }}
-              />
-            </div>
-
+        {/* Four full-screen triangles */}
+        <AnimatePresence>
+          {covering ? (
             <motion.div
-              className="pointer-events-none absolute left-0 right-0 top-[16%] z-20 origin-top"
-              style={{ height: "48%", transformStyle: "preserve-3d" }}
-              animate={{ rotateX: opening ? -165 : 0 }}
-              transition={{ duration: 1.55, ease: easeSmooth, delay: 0.08 }}
+              key="tri-cover"
+              className="fixed inset-0 z-[55]"
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.35 } }}
             >
-              <div
-                className="absolute inset-0"
-                style={{
-                  clipPath: "polygon(0 0, 100% 0, 50% 100%)",
-                  background: PAPER_FLAP,
-                  boxShadow: "0 10px 28px rgba(42,29,18,0.14)",
-                }}
+              {/* Soft title above seal */}
+              <motion.div
+                className="pointer-events-none absolute inset-x-0 top-[max(5rem,9svh)] z-[70] px-4 text-center"
+                animate={{ opacity: opening ? 0 : 1, y: opening ? -12 : 0 }}
+                transition={{ duration: 0.55, ease: easeSmooth }}
               >
-                <div
-                  className="absolute inset-x-0 top-0 h-[3px]"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(122,74,37,0.22), rgba(255,255,255,0.35))",
-                  }}
-                />
-              </div>
-            </motion.div>
+                <h1 className="font-display text-2xl font-bold text-mocha drop-shadow-sm sm:text-3xl md:text-4xl">
+                  Save The Date
+                </h1>
+                <p className="mt-2 font-serif text-sm text-ink-soft/80 sm:text-base">
+                  Tap the seal to open
+                </p>
+              </motion.div>
 
-            {/* Seal — the actual click target */}
-            <motion.button
-              type="button"
-              onClick={open}
-              disabled={phase !== "sealed"}
-              aria-label="Open invitation and start music"
-              className="absolute left-1/2 z-50 -translate-x-1/2 focus-visible:outline-none disabled:cursor-default"
-              style={{ top: "48%" }}
-              animate={
-                opening
-                  ? {
-                      scale: [1, 1.06, 0],
-                      opacity: [1, 1, 0],
-                      y: [0, -6, 24],
-                      rotate: [0, -8, 14],
-                    }
-                  : { scale: 1, opacity: 1, y: 0 }
-              }
-              transition={{ duration: 1.05, ease: easeSmooth }}
-              whileHover={
-                phase === "sealed" ? { scale: 1.06 } : undefined
-              }
-              whileTap={phase === "sealed" ? { scale: 0.96 } : undefined}
-            >
-              <span
-                className="flex h-[78px] w-[78px] items-center justify-center rounded-full border border-[#f0d2a0]/35 p-1 sm:h-[88px] sm:w-[88px]"
+              {/* TOP triangle — covers upper half meeting at center */}
+              <motion.div
+                className="absolute inset-x-0 top-0 z-[56] h-[55%]"
+                style={{
+                  background: PANEL,
+                  clipPath: "polygon(0 0, 100% 0, 50% 100%)",
+                  boxShadow: "0 18px 40px rgba(42,29,18,0.18)",
+                }}
+                initial={false}
+                animate={
+                  opening
+                    ? { y: "-105%", opacity: 0.95 }
+                    : { y: 0, opacity: 1 }
+                }
+                transition={{ duration: 1.15, ease: easeSmooth, delay: 0.05 }}
+              >
+                <div className="absolute inset-0 border-b border-[#d4af37]/25" />
+              </motion.div>
+
+              {/* BOTTOM triangle */}
+              <motion.div
+                className="absolute inset-x-0 bottom-0 z-[56] h-[55%]"
+                style={{
+                  background: PANEL,
+                  clipPath: "polygon(50% 0, 100% 100%, 0 100%)",
+                  boxShadow: "0 -18px 40px rgba(42,29,18,0.16)",
+                }}
+                initial={false}
+                animate={
+                  opening
+                    ? { y: "105%", opacity: 0.95 }
+                    : { y: 0, opacity: 1 }
+                }
+                transition={{ duration: 1.15, ease: easeSmooth, delay: 0.08 }}
+              />
+
+              {/* LEFT triangle */}
+              <motion.div
+                className="absolute inset-y-0 left-0 z-[57] w-[55%]"
                 style={{
                   background:
-                    "radial-gradient(circle at 32% 28%, #d46555 0%, #a3382c 40%, #5c1610 100%)",
-                  boxShadow:
-                    "0 12px 28px rgba(74,18,14,0.4), inset 0 3px 8px rgba(255,200,180,0.3)",
+                    "linear-gradient(125deg, #f3e7d6 0%, #e4d0b3 55%, #d6bc98 100%)",
+                  clipPath: "polygon(0 0, 100% 50%, 0 100%)",
+                  boxShadow: "12px 0 36px rgba(42,29,18,0.14)",
                 }}
+                initial={false}
+                animate={
+                  opening
+                    ? { x: "-105%", opacity: 0.95 }
+                    : { x: 0, opacity: 1 }
+                }
+                transition={{ duration: 1.15, ease: easeSmooth, delay: 0.02 }}
+              />
+
+              {/* RIGHT triangle */}
+              <motion.div
+                className="absolute inset-y-0 right-0 z-[57] w-[55%]"
+                style={{
+                  background:
+                    "linear-gradient(235deg, #f3e7d6 0%, #e4d0b3 55%, #d6bc98 100%)",
+                  clipPath: "polygon(100% 0, 100% 100%, 0 50%)",
+                  boxShadow: "-12px 0 36px rgba(42,29,18,0.14)",
+                }}
+                initial={false}
+                animate={
+                  opening
+                    ? { x: "105%", opacity: 0.95 }
+                    : { x: 0, opacity: 1 }
+                }
+                transition={{ duration: 1.15, ease: easeSmooth, delay: 0.1 }}
+              />
+
+              {/* Gold seam lines toward the seal */}
+              <div
+                className="pointer-events-none absolute inset-0 z-[58] opacity-40"
+                aria-hidden
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent 49.6%, rgba(212,175,55,0.55) 50%, transparent 50.4%), linear-gradient(0deg, transparent 49.6%, rgba(212,175,55,0.45) 50%, transparent 50.4%)",
+                }}
+              />
+
+              {/* Center seal */}
+              <motion.button
+                type="button"
+                onClick={open}
+                disabled={!sealed}
+                aria-label="Open invitation and start music"
+                className="absolute left-1/2 top-1/2 z-[80] -translate-x-1/2 -translate-y-1/2 focus-visible:outline-none disabled:cursor-default"
+                animate={
+                  opening
+                    ? {
+                        scale: [1, 1.12, 0],
+                        opacity: [1, 1, 0],
+                        rotate: [0, -12, 18],
+                      }
+                    : reduce
+                      ? { scale: 1, opacity: 1 }
+                      : { scale: [1, 1.05, 1], opacity: 1 }
+                }
+                transition={
+                  opening
+                    ? { duration: 0.85, ease: easeSmooth }
+                    : {
+                        duration: 2.6,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }
+                }
+                whileHover={sealed ? { scale: 1.08 } : undefined}
+                whileTap={sealed ? { scale: 0.95 } : undefined}
               >
-                <span className="overflow-hidden rounded-full bg-[#1a120c] p-[2px]">
-                  <LogoMark size={48} priority />
+                <span
+                  className="flex h-[100px] w-[100px] items-center justify-center rounded-full border border-[#f0d2a0]/45 p-1.5 sm:h-[118px] sm:w-[118px]"
+                  style={{
+                    background:
+                      "radial-gradient(circle at 32% 28%, #d46555 0%, #a3382c 40%, #5c1610 100%)",
+                    boxShadow:
+                      "0 18px 42px rgba(74,18,14,0.5), inset 0 3px 12px rgba(255,200,180,0.35)",
+                  }}
+                >
+                  <span className="overflow-hidden rounded-full bg-[#1a120c] p-[3px]">
+                    <LogoMark
+                      size={64}
+                      className="h-16 w-16 sm:h-[70px] sm:w-[70px]"
+                      priority
+                    />
+                  </span>
                 </span>
-              </span>
-            </motion.button>
-          </div>
-        </motion.div>
+              </motion.button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        {done ? (
+          <motion.button
+            type="button"
+            aria-label="Scroll to details"
+            onClick={() =>
+              document
+                .getElementById("save-date-details")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="absolute bottom-2 z-30 flex flex-col items-center gap-0.5 text-cognac/80 sm:bottom-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, y: [0, 4, 0] }}
+            transition={{
+              opacity: { delay: 0.4, duration: 0.5 },
+              y: { duration: 1.6, repeat: Infinity, ease: "easeInOut" },
+            }}
+          >
+            <span className="font-display text-[10px] font-bold uppercase tracking-[0.2em]">
+              Details below
+            </span>
+            <ChevronDown className="h-4 w-4" />
+          </motion.button>
+        ) : null}
       </div>
 
       <AnimatePresence>
         {done ? (
           <motion.div
-            className="relative z-10 mt-8 flex w-full max-w-md flex-col items-center px-2 text-center sm:mt-10"
+            id="save-date-details"
+            className="relative z-10 mx-auto flex w-full max-w-md flex-col items-center px-4 pb-16 pt-1 text-center sm:pb-20"
             initial={
-              reduce
-                ? { opacity: 1 }
-                : { opacity: 0, y: 80, scale: 0.92 }
+              reduce ? { opacity: 1 } : { opacity: 0, y: 28, scale: 0.98 }
             }
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.15, delay: 0.15, ease: easeSmooth }}
+            transition={{ duration: 0.85, delay: 0.15, ease: easeSmooth }}
           >
             <p className="type-eyebrow text-[10px] text-cognac sm:text-[11px]">
               {wedding.date.caps}
@@ -295,11 +293,11 @@ export function SaveTheDateExperience() {
             <p className="type-eyebrow mt-2 text-[10px] text-dusty-blue sm:text-[11px]">
               {wedding.venue.name}
             </p>
-            <div className="w-full px-1 pt-5">
+            <div className="w-full px-1 pt-4">
               <Countdown />
             </div>
             <GuestDetailsForm />
-            <p className="mt-8 max-w-sm font-serif text-sm text-ink-soft/55">
+            <p className="mt-6 max-w-sm font-serif text-sm text-ink-soft/55">
               Formal invitation to follow · {wedding.hashtag}
             </p>
           </motion.div>
