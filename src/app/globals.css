@@ -393,6 +393,40 @@ body {
   box-shadow: var(--shadow-md);
 }
 
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(243, 231, 180, 0.38) 50%,
+    transparent 80%
+  );
+  transform: translateX(-120%);
+  transition: transform 900ms var(--ease-out-expo);
+}
+
+.btn-shimmer:hover::after {
+  transform: translateX(120%);
+}
+
+.ticket-notch {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--cream);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
 .divider-gold {
   height: 1px;
   width: 64px;

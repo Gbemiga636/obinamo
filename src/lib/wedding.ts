@@ -94,16 +94,29 @@ export const wedding = {
       detail: "Dance the night away with us.",
     },
   ],
+  hotel: {
+    name: "Crowne Plaza Norcross",
+    brand: "Crowne Plaza",
+    location: "Norcross",
+    street: "6050 Peachtree Industrial Blvd",
+    cityLine: "Norcross, GA 30071",
+    bookingUrl:
+      "https://www.ihg.com/redirect?path=asearch&brandCode=CP&localeCode=en&regionCode=1&hotelCode=ATLPT&checkInDate=19&checkInMonthYear=102026&checkOutDate=22&checkOutMonthYear=102026&rateCode=6CBARC&_PMID=99801505&GPC=WOB&cn=no&adjustMonth=false&showApp=true&monthIndex=00",
+    detailsUrl:
+      "https://www.ihg.com/crowneplaza/hotels/us/en/norcross/atlpt/hoteldetail",
+    mapsUrl:
+      "https://www.google.com/maps/search/?api=1&query=Crowne+Plaza+Norcross+6050+Peachtree+Industrial+Blvd+Norcross+GA+30071",
+    checkIn: { weekday: "Thursday", day: "19", month: "Nov" },
+    checkOut: { weekday: "Sunday", day: "22", month: "Nov" },
+    nights: 3,
+    airport: "Hartsfield–Jackson Atlanta International (ATL)",
+    airportDistance: "about 30 miles from the hotel",
+  },
   hotels: [
     {
-      name: "Nearby Boutique Stay",
-      detail: "5–10 minutes from the venue · Ask for wedding rate",
-      link: "https://www.google.com/maps/search/?api=1&query=hotels+near+Norcross+Georgia",
-    },
-    {
-      name: "City Comfort Hotel",
-      detail: "Ideal for out-of-town guests · Shuttle options TBD",
-      link: "https://www.google.com/maps/search/?api=1&query=hotels+Norcross+GA",
+      name: "Crowne Plaza Norcross",
+      detail: "6050 Peachtree Industrial Blvd, Norcross, GA 30071",
+      link: "https://www.ihg.com/redirect?path=asearch&brandCode=CP&localeCode=en&regionCode=1&hotelCode=ATLPT&checkInDate=19&checkInMonthYear=102026&checkOutDate=22&checkOutMonthYear=102026&rateCode=6CBARC&_PMID=99801505&GPC=WOB&cn=no&adjustMonth=false&showApp=true&monthIndex=00",
     },
   ],
   registry: [
@@ -151,11 +164,11 @@ export const wedding = {
 export const navItems = [
   { label: "Home", href: "/", live: true },
   { label: "Save The Date", href: "/save-the-date", live: true },
+  { label: "Travel/Hotels", href: "/travel", live: true },
   { label: "Schedule", href: "/schedule", live: false },
   { label: "Wedding Party", href: "/wedding-party", live: false },
   { label: "Gallery", href: "/gallery", live: false },
   { label: "RSVP", href: "/rsvp", live: false },
   { label: "Registry", href: "/registry", live: false },
-  { label: "Travel/Hotels", href: "/travel", live: false },
   { label: "Things to Do/FAQs", href: "/faqs", live: false },
 ] as const;
