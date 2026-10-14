@@ -1,27 +1,26 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
   BedDouble,
-  ChevronDown,
+  Globe,
   Heart,
+  Hourglass,
   Luggage,
   MapPin,
   Plane,
+  PlaneLanding,
 } from "lucide-react";
 import { LogoMark } from "@/components/ui/LogoMark";
-import {
-  GoldArch,
-  GoldDiamond,
-  GoldHeart,
-  GoldHeartDivider,
-} from "@/components/ui/GoldOrnaments";
-import { useInvitation } from "@/providers/InvitationProvider";
+import { PageHero } from "@/components/layout/PageHero";
+import { PetalGather } from "@/components/effects/PetalGather";
+import { GoldDiamond, GoldHeart } from "@/components/ui/GoldOrnaments";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth } from "@/lib/motion";
 
-const { hotel } = wedding;
+const { hotel, venue, airports } = wedding;
 
 const JOURNEY = [
   {
@@ -34,13 +33,13 @@ const JOURNEY = [
     icon: BedDouble,
     when: `${hotel.checkIn.weekday.slice(0, 3)} · ${hotel.checkIn.month} ${hotel.checkIn.day}`,
     title: "Check in",
-    detail: "Settle in, unwind, and rest before the big day.",
+    detail: "Settle in, unwind, and rest up before the big day.",
   },
   {
     icon: Heart,
     when: "Fri · Nov 20",
     title: "Celebrate",
-    detail: "Our traditional wedding — we can't wait to see you.",
+    detail: `Our traditional wedding at ${venue.name}, just minutes from the hotel.`,
   },
   {
     icon: Luggage,
@@ -50,12 +49,14 @@ const JOURNEY = [
   },
 ] as const;
 
-const FLOATS = [
-  { kind: "heart", x: "7%", y: "26%", delay: 0.6, dur: 7.8 },
-  { kind: "diamond", x: "90%", y: "22%", delay: 1.1, dur: 8.4 },
-  { kind: "diamond", x: "10%", y: "68%", delay: 1.6, dur: 8.1 },
-  { kind: "heart", x: "88%", y: "62%", delay: 0.9, dur: 7.4 },
-] as const;
+function useDaysLeft(iso: string) {
+  const [days, setDays] = useState<number | null>(null);
+  useEffect(() => {
+    const ms = new Date(iso).getTime() - Date.now();
+    setDays(ms < 0 ? -1 : Math.floor(ms / 86_400_000));
+  }, [iso]);
+  return days;
+}
 
 function DateTile({
   label,
@@ -88,13 +89,7 @@ function DateTile({
 
 export function TravelExperience() {
   const reduce = useReducedMotion();
-  const { unlocked } = useInvitation();
-
-  const rise = (delay: number) => ({
-    initial: reduce ? false : { opacity: 0, y: 18 },
-    animate: unlocked || reduce ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 },
-    transition: { duration: 1.1, ease: easeSmooth, delay },
-  });
+  const daysLeft = useDaysLeft(hotel.bookBy.iso);
 
   const inView = (delay = 0) => ({
     initial: reduce ? false : { opacity: 0, y: 28 },
@@ -103,100 +98,30 @@ export function TravelExperience() {
     transition: { duration: 1, ease: easeSmooth, delay },
   });
 
+  const daysLabel =
+    daysLeft === null || daysLeft < 0
+      ? null
+      : daysLeft === 0
+        ? "Last day to book!"
+        : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+
   return (
     <div className="relative overflow-x-clip">
       <div className="surface-paper absolute inset-0" />
       <div className="surface-grain absolute inset-0 opacity-50" />
 
-      {/* ── Hero ── */}
-      <section className="relative px-4 pb-4 pt-28 sm:pt-32">
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255,255,255,0.6), transparent 70%)",
-          }}
-        />
-
-        {unlocked && !reduce ? (
-          <div className="pointer-events-none absolute inset-0 hidden sm:block" aria-hidden>
-            {FLOATS.map((f, i) => (
-              <div
-                key={i}
-                className="hero-float absolute"
-                style={{
-                  left: f.x,
-                  top: f.y,
-                  animationDelay: `${f.delay}s`,
-                  animationDuration: `${f.dur}s`,
-                }}
-              >
-                {f.kind === "heart" ? <GoldHeart size={13} /> : <GoldDiamond />}
-              </div>
-            ))}
-          </div>
-        ) : null}
-
-        <div className="relative mx-auto max-w-[min(100%,440px)] text-center sm:max-w-[480px]">
-          <div className="pointer-events-none absolute -inset-x-1 -top-3 bottom-0 sm:-inset-x-8 sm:-top-6">
-            <GoldArch className="h-full w-full max-w-none opacity-85" />
-          </div>
-
-          <div className="relative px-6 pb-10 pt-9 sm:px-10 sm:pt-12">
-            <motion.div className="mb-5 flex justify-center" {...rise(0.1)}>
-              <div className="rounded-full border border-soft-gold/45 bg-paper/80 p-1 shadow-[var(--shadow-md)]">
-                <LogoMark size={48} className="h-11 w-11 sm:h-12 sm:w-12" />
-              </div>
-            </motion.div>
-
-            <motion.p className="type-eyebrow" {...rise(0.25)}>
-              Travel &amp; Stay
-            </motion.p>
-
-            <motion.h1
-              className="type-script mt-3 text-[clamp(2.6rem,11vw,4.3rem)] text-ink"
-              {...rise(0.4)}
-            >
-              Stay Close to Us
-            </motion.h1>
-
-            <motion.p
-              className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.34em] text-caramel sm:text-xs"
-              {...rise(0.55)}
-            >
-              Norcross · Georgia
-            </motion.p>
-
-            <motion.div className="mt-6" {...rise(0.7)}>
-              <GoldHeartDivider />
-            </motion.div>
-
-            <motion.p
-              className="mx-auto mt-5 max-w-[30ch] font-serif text-[15px] leading-relaxed text-ink-soft/80 sm:text-base"
-              {...rise(0.85)}
-            >
-              We&apos;ve chosen a beautiful home base for our guests — rest,
-              refresh, and celebrate the weekend with us.
-            </motion.p>
-
-            <motion.button
-              type="button"
-              onClick={() =>
-                document
-                  .getElementById("wedding-hotel")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" })
-              }
-              className="mx-auto mt-7 flex flex-col items-center gap-1 text-cognac/80 transition hover:text-cognac"
-              {...rise(1)}
-            >
-              <span className="font-display text-[10px] font-bold uppercase tracking-[0.24em]">
-                Our wedding hotel
-              </span>
-              <ChevronDown className="h-4 w-4" />
-            </motion.button>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Travel & Stay"
+        title="Stay Close to Us"
+        subtitle="Norcross · Georgia"
+        scrollTarget="wedding-hotel"
+        scrollLabel="Our wedding hotel"
+      >
+        <p>
+          We&apos;ve chosen a beautiful home base for our guests: rest,
+          refresh, and celebrate the weekend with us.
+        </p>
+      </PageHero>
 
       {/* ── Hotel ticket ── */}
       <section
@@ -246,16 +171,18 @@ export function TravelExperience() {
               </p>
 
               <div className="mt-6 flex flex-wrap gap-2">
-                {[`${hotel.nights} nights`, "Norcross, GA", "Book early"].map(
-                  (chip) => (
-                    <span
-                      key={chip}
-                      className="border border-soft-gold/35 bg-ivory/70 px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-caramel"
-                    >
-                      {chip}
-                    </span>
-                  ),
-                )}
+                {[
+                  `${hotel.nights} nights`,
+                  "Norcross, GA",
+                  `Book by ${hotel.bookBy.short}`,
+                ].map((chip) => (
+                  <span
+                    key={chip}
+                    className="border border-soft-gold/35 bg-ivory/70 px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-caramel"
+                  >
+                    {chip}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -292,11 +219,30 @@ export function TravelExperience() {
                 />
               </div>
 
+              <div className="mt-8 border border-cognac/25 bg-paper/70 px-4 py-3.5 text-center">
+                <p className="flex items-center justify-center gap-2 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-cognac">
+                  <Hourglass className="h-3.5 w-3.5" strokeWidth={1.8} />
+                  Reservations close
+                </p>
+                <p className="mt-1.5 font-serif text-[15px] font-semibold text-mocha">
+                  {hotel.bookBy.long}
+                </p>
+                {daysLabel ? (
+                  <motion.p
+                    className="mx-auto mt-2 inline-block bg-cognac px-3 py-1 font-display text-[9px] font-bold uppercase tracking-[0.22em] text-ivory"
+                    animate={reduce ? undefined : { scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    {daysLabel}
+                  </motion.p>
+                ) : null}
+              </div>
+
               <a
                 href={hotel.bookingUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary btn-shimmer mt-9 w-full"
+                className="btn-primary btn-shimmer mt-6 w-full"
               >
                 Book your room
                 <ArrowUpRight className="h-4 w-4" />
@@ -304,6 +250,55 @@ export function TravelExperience() {
             </div>
           </div>
         </motion.article>
+      </section>
+
+      {/* ── Arriving by air ── */}
+      <section className="relative px-4 pb-16 sm:pb-20">
+        <div className="mb-8 flex justify-center">
+          <PetalGather shape="heart" wind="right" seed={11} width={210} height={180}>
+            <span className="type-script mt-2 text-[1.7rem] text-cognac">
+              see you soon
+            </span>
+          </PetalGather>
+        </div>
+        <motion.div className="text-center" {...inView()}>
+          <p className="type-eyebrow">Flying in</p>
+          <h2 className="type-script mt-2 text-[clamp(2.4rem,9vw,3.6rem)]">
+            Arriving by Air
+          </h2>
+        </motion.div>
+
+        <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+          {airports.map((a, i) => {
+            const Icon = i === 0 ? PlaneLanding : Globe;
+            return (
+              <motion.div
+                key={a.name}
+                className="panel relative overflow-hidden px-6 py-8 text-center sm:px-8"
+                {...inView(0.12 * i)}
+              >
+                <span className="pointer-events-none absolute -right-3 -top-4 font-display text-[4.5rem] font-extrabold leading-none tracking-tight text-soft-gold/[0.12]">
+                  ATL
+                </span>
+                <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-soft-gold/50 bg-paper text-cognac shadow-[var(--shadow-sm)]">
+                  <Icon className="h-5 w-5" strokeWidth={1.6} />
+                </span>
+                <p className="type-eyebrow relative mt-5 text-[9px] tracking-[0.26em] text-dusty-blue">
+                  {a.tag}
+                </p>
+                <p className="relative mt-2 font-display text-lg font-bold uppercase leading-snug tracking-[0.06em] text-mocha">
+                  {a.name}
+                </p>
+                <p className="relative mt-1 font-display text-[10px] font-bold uppercase tracking-[0.3em] text-caramel">
+                  {a.code}
+                </p>
+                <p className="relative mx-auto mt-4 max-w-[36ch] font-serif text-[15px] leading-relaxed text-ink-soft/75">
+                  {a.detail}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
       </section>
 
       {/* ── Journey ── */}
@@ -356,7 +351,7 @@ export function TravelExperience() {
       {/* ── Getting there ── */}
       <section className="relative px-4 py-14 sm:py-16">
         <motion.div
-          className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2"
+          className="mx-auto grid max-w-5xl gap-4 md:grid-cols-3"
           {...inView()}
         >
           {[
@@ -371,6 +366,12 @@ export function TravelExperience() {
               icon: BedDouble,
               title: "Hotel details",
               detail: "Rooms, amenities & contact",
+            },
+            {
+              href: venue.mapsUrl,
+              icon: Heart,
+              title: "The venue",
+              detail: venue.name,
             },
           ].map(({ href, icon: Icon, title, detail }) => (
             <a
@@ -416,7 +417,8 @@ export function TravelExperience() {
           </p>
           <div className="mx-auto my-3 h-px w-14 bg-soft-gold/55" />
           <p className="mx-auto max-w-md font-serif text-sm text-ivory/85 sm:text-base">
-            Book early so you&apos;re settled in and ready to celebrate with us.
+            Hotel reservations close on {hotel.bookBy.long}. Book early so
+            you&apos;re settled in and ready to celebrate with us.
           </p>
           <a
             href={hotel.bookingUrl}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { FloralSide } from "@/components/flowers/FloralSide";
+import { PetalGather } from "@/components/effects/PetalGather";
 import {
   GoldArch,
   GoldFlourish,
@@ -268,18 +269,32 @@ export function HeroSection() {
               "linear-gradient(105deg, #5c3a1f 0%, #B67A3D 42%, #7a4a25 100%)",
           }}
         >
-          <div className="mb-3 flex justify-center gap-2 opacity-80" aria-hidden>
-            <GoldHeart size={10} />
-            <GoldDiamond />
-            <GoldHeart size={10} />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <PetalGather
+              shape="ring"
+              wind="right"
+              width={360}
+              height={170}
+              petals={20}
+              sparkles={10}
+              seed={3}
+              className="max-sm:scale-[0.82]"
+            />
           </div>
-          <p className="font-display text-lg font-bold tracking-wide text-ivory sm:text-2xl">
-            {wedding.tagline}
-          </p>
-          <div className="mx-auto my-3 h-px w-14 bg-soft-gold/55" />
-          <p className="mx-auto max-w-lg font-serif text-sm font-medium text-ivory/85 sm:text-base">
-            {wedding.thankYou}
-          </p>
+          <div className="relative">
+            <div className="mb-3 flex justify-center gap-2 opacity-80" aria-hidden>
+              <GoldHeart size={10} />
+              <GoldDiamond />
+              <GoldHeart size={10} />
+            </div>
+            <p className="font-display text-lg font-bold tracking-wide text-ivory sm:text-2xl">
+              {wedding.tagline}
+            </p>
+            <div className="mx-auto my-3 h-px w-14 bg-soft-gold/55" />
+            <p className="mx-auto max-w-lg font-serif text-sm font-medium text-ivory/85 sm:text-base">
+              {wedding.thankYou}
+            </p>
+          </div>
         </div>
       </motion.div>
     </section>

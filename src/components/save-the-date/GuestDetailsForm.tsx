@@ -4,7 +4,21 @@ import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { easeSmooth } from "@/lib/motion";
 
-export function GuestDetailsForm() {
+export function GuestDetailsForm({
+  heading = "Stay connected",
+  description = "Share your details so we can keep you close to every update.",
+  submitLabel = "Save my details",
+  successTitle = "You're on the list",
+  successMessage = "Thank you — your details are safely with us.",
+  className = "mt-10",
+}: {
+  heading?: string;
+  description?: string;
+  submitLabel?: string;
+  successTitle?: string;
+  successMessage?: string;
+  className?: string;
+} = {}) {
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
   const [phone, setPhone] = useState("");
@@ -37,7 +51,7 @@ export function GuestDetailsForm() {
         return;
       }
       setStatus("done");
-      setMessage("Thank you — your details are safely with us.");
+      setMessage(successMessage);
     } catch {
       setStatus("error");
       setMessage("Network error. Please try again.");
@@ -47,13 +61,13 @@ export function GuestDetailsForm() {
   if (status === "done") {
     return (
       <motion.div
-        className="mt-10 w-full max-w-md rounded-sm border border-soft-gold/35 bg-paper/80 px-5 py-8 text-center shadow-[var(--shadow-md)]"
+        className={`${className} w-full max-w-md rounded-sm border border-soft-gold/35 bg-paper/80 px-5 py-8 text-center shadow-[var(--shadow-md)]`}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: easeSmooth }}
       >
         <p className="font-display text-sm font-bold uppercase tracking-[0.22em] text-cognac">
-          You&apos;re on the list
+          {successTitle}
         </p>
         <p className="mt-3 font-serif text-sm text-ink-soft/75">{message}</p>
       </motion.div>
@@ -63,17 +77,17 @@ export function GuestDetailsForm() {
   return (
     <motion.form
       onSubmit={onSubmit}
-      className="mt-10 w-full max-w-md space-y-4 rounded-sm border border-soft-gold/35 bg-paper/85 px-5 py-7 text-left shadow-[var(--shadow-md)] sm:px-7"
+      className={`${className} w-full max-w-md space-y-4 rounded-sm border border-soft-gold/35 bg-paper/85 px-5 py-7 text-left shadow-[var(--shadow-md)] sm:px-7`}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, delay: 0.25, ease: easeSmooth }}
     >
       <div className="text-center">
         <p className="font-display text-sm font-bold uppercase tracking-[0.2em] text-cognac">
-          Stay connected
+          {heading}
         </p>
         <p className="mt-2 font-serif text-sm text-ink-soft/70">
-          Share your details so we can keep you close to every update.
+          {description}
         </p>
       </div>
 
@@ -138,7 +152,7 @@ export function GuestDetailsForm() {
         disabled={status === "saving"}
         className="btn-primary w-full disabled:opacity-60"
       >
-        {status === "saving" ? "Saving…" : "Save my details"}
+        {status === "saving" ? "Saving…" : submitLabel}
       </button>
     </motion.form>
   );
