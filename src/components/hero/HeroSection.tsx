@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
 import { FloralSide } from "@/components/flowers/FloralSide";
 import { PetalGather } from "@/components/effects/PetalGather";
+import { HeroFilm } from "@/components/hero/HeroFilm";
 import {
   GoldArch,
   GoldFlourish,
@@ -34,6 +35,8 @@ const softIn = {
 
 export function HeroSection() {
   const [step, setStep] = useState(0);
+  const [cinema, setCinema] = useState(false);
+  const archRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { unlocked } = useInvitation();
 
@@ -56,6 +59,12 @@ export function HeroSection() {
           background:
             "radial-gradient(ellipse 75% 60% at 50% 28%, rgba(255,255,255,0.62), transparent 68%)",
         }}
+      />
+
+      <HeroFilm
+        start={unlocked && (step >= 4 || !!reduce)}
+        anchorRef={archRef}
+        onReveal={() => setCinema(true)}
       />
 
       {/* Soft ambient floats — CSS so they don’t fight scroll */}
@@ -87,7 +96,11 @@ export function HeroSection() {
         </div>
       ) : null}
 
-      <div className="relative z-30 flex flex-1 flex-col items-center justify-center px-3 pb-36 pt-24 sm:px-14 sm:pb-52 sm:pt-28 md:px-24">
+      <div
+        className={`hero-copy relative z-30 flex flex-1 flex-col items-center justify-center px-3 pb-36 pt-24 sm:px-14 sm:pb-52 sm:pt-28 md:px-24 ${
+          cinema ? "hero-cinema" : ""
+        }`}
+      >
         <motion.div
           className="relative mx-auto w-full max-w-[min(100%,440px)] text-center sm:max-w-[480px] lg:max-w-[600px] lg:min-h-[min(72vh,700px)] lg:flex lg:flex-col lg:justify-center"
           initial={reduce || !unlocked ? false : { opacity: 0, y: 18 }}
@@ -97,7 +110,9 @@ export function HeroSection() {
           transition={{ duration: 1.5, ease: easeSmooth, delay: 0.05 }}
         >
           {/* Mobile/sm unchanged; laptop+ matches sample’s tall, roomy arch */}
-          <div className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0 lg:-inset-x-24 lg:-top-14 lg:bottom-[-2.75rem] xl:-inset-x-32 xl:-top-16 xl:bottom-[-3.25rem]">
+          <div
+            ref={archRef}
+            className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0 lg:-inset-x-24 lg:-top-14 lg:bottom-[-2.75rem] xl:-inset-x-32 xl:-top-16 xl:bottom-[-3.25rem]">
             <GoldArch className="h-full w-full max-w-none scale-x-[1.08] opacity-90 sm:scale-x-100 lg:scale-x-[1.02]" />
           </div>
 
@@ -129,13 +144,13 @@ export function HeroSection() {
 
             <div className="min-h-[18px]">
               {reduce ? (
-                <p className="type-eyebrow">Welcome to our</p>
+                <p className="hero-welcome type-eyebrow">Welcome to our</p>
               ) : unlocked ? (
                 <TypewriterText
                   key="hero-welcome"
                   text="Welcome to our"
                   as="p"
-                  className="type-eyebrow"
+                  className="hero-welcome type-eyebrow"
                   delay={550}
                   speed={48}
                   onDone={() => setStep(1)}
@@ -151,7 +166,7 @@ export function HeroSection() {
 
             <div className="mt-2 min-h-[70px] sm:min-h-[88px]">
               {reduce ? (
-                <h1 className="type-display gold-foil text-[clamp(1.75rem,7vw,3.35rem)] sm:text-[clamp(2rem,7.5vw,3.35rem)]">
+                <h1 className="hero-headline type-display gold-foil text-[clamp(1.75rem,7vw,3.35rem)] sm:text-[clamp(2rem,7.5vw,3.35rem)]">
                   Wedding Website
                 </h1>
               ) : unlocked && step >= 1 ? (
@@ -159,7 +174,7 @@ export function HeroSection() {
                   key="hero-headline"
                   text="Wedding Website"
                   as="h1"
-                  className="type-display gold-foil text-[clamp(1.75rem,7vw,3.35rem)] sm:text-[clamp(2rem,7.5vw,3.35rem)]"
+                  className="hero-headline type-display gold-foil text-[clamp(1.75rem,7vw,3.35rem)] sm:text-[clamp(2rem,7.5vw,3.35rem)]"
                   delay={180}
                   speed={42}
                   onDone={() => setStep(2)}

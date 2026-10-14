@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { useSound } from "@/providers/SoundProvider";
 import { LogoMark } from "@/components/ui/LogoMark";
+import { FlashReveal } from "@/components/invitation/FlashReveal";
 import { easeSmooth } from "@/lib/motion";
 
 const PARTICLE_COUNT = 36;
@@ -15,19 +16,22 @@ const PARTICLE_COUNT = 36;
  */
 export function ExperienceLoader() {
   const { beginUnlock, completeUnlock } = useInvitation();
-  const { startExperienceAudio, primeAudio, awaitGesturePlayback } = useSound();
+  const { startExperienceAudio, primeAudio, awaitGesturePlayback, play } =
+    useSound();
   const reduce = useReducedMotion();
-  const [phase, setPhase] = useState<"assemble" | "fill" | "bloom" | "done">(
-    "assemble",
-  );
+  const [phase, setPhase] = useState<
+    "assemble" | "fill" | "bloom" | "flash" | "done"
+  >("assemble");
   const [progress, setProgress] = useState(0);
 
   const startAudioRef = useRef(startExperienceAudio);
   const completeRef = useRef(completeUnlock);
   const awaitGestureRef = useRef(awaitGesturePlayback);
+  const playRef = useRef(play);
   startAudioRef.current = startExperienceAudio;
   completeRef.current = completeUnlock;
   awaitGestureRef.current = awaitGesturePlayback;
+  playRef.current = play;
 
   const particles = useMemo(
     () =>
@@ -76,7 +80,23 @@ export function ExperienceLoader() {
 
     const finish = async () => {
       if (cancelled) return;
-      setPhase("done");
+
+      if (reduce) {
+        setPhase("done");
+        timers.push(
+          window.setTimeout(() => {
+            if (!cancelled) completeRef.current();
+          }, 400),
+        );
+      } else {
+        setPhase("flash");
+        playRef.current("shutter");
+        timers.push(
+          window.setTimeout(() => {
+            if (!cancelled) completeRef.current();
+          }, 3000),
+        );
+      }
 
       let ok = false;
       try {
@@ -92,12 +112,6 @@ export function ExperienceLoader() {
 
       if (cancelled) return;
       if (!ok) awaitGestureRef.current();
-
-      timers.push(
-        window.setTimeout(() => {
-          if (!cancelled) completeRef.current();
-        }, 400),
-      );
     };
 
     // Hard unlock failsafe
@@ -107,7 +121,7 @@ export function ExperienceLoader() {
           awaitGestureRef.current();
           completeRef.current();
         }
-      }, 8000),
+      }, 11000),
     );
 
     if (reduce) {
@@ -140,7 +154,7 @@ export function ExperienceLoader() {
     };
   }, [reduce, beginUnlock]);
 
-  const showMark = phase === "bloom" || phase === "done";
+  const showMark = phase === "bloom" || phase === "flash" || phase === "done";
 
   return (
     <motion.div
@@ -148,9 +162,12 @@ export function ExperienceLoader() {
       initial={{ opacity: 1 }}
       exit={{
         opacity: 0,
-        transition: { duration: 1.2, ease: easeSmooth },
+        scale: reduce ? 1 : 1.04,
+        filter: reduce ? "none" : "brightness(1.7)",
+        transition: { duration: 1.3, ease: easeSmooth },
       }}
     >
+      <FlashReveal active={phase === "flash"} />
       <div className="surface-paper absolute inset-0" />
       <div className="surface-grain absolute inset-0" />
       <div

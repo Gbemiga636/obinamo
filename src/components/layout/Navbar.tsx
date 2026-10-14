@@ -10,6 +10,7 @@ import { useScrollY } from "@/hooks/useMouseParallax";
 import { LogoMark } from "@/components/ui/LogoMark";
 import { ComingSoonModal } from "@/components/layout/ComingSoonModal";
 import { navItems } from "@/lib/wedding";
+import { useNavDark } from "@/lib/navTheme";
 import { cn } from "@/lib/utils";
 import { easeOutExpo } from "@/lib/motion";
 
@@ -19,6 +20,7 @@ export function Navbar() {
   const compact = scrollY > 20;
   const [open, setOpen] = useState(false);
   const [soonTitle, setSoonTitle] = useState<string | null>(null);
+  const dark = useNavDark() && !compact && !open;
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -48,7 +50,9 @@ export function Navbar() {
           "fixed inset-x-0 top-0 z-50 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]",
           compact || open
             ? "h-16 border-b border-[var(--line)] bg-ivory/90 shadow-[var(--shadow-sm)] backdrop-blur-xl"
-            : "h-16 bg-transparent md:h-[72px]",
+            : dark
+              ? "h-16 bg-gradient-to-b from-black/55 to-transparent md:h-[72px]"
+              : "h-16 bg-transparent md:h-[72px]",
         )}
       >
         <nav className="mx-auto flex h-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:px-8">
@@ -75,7 +79,9 @@ export function Navbar() {
                       "relative block whitespace-nowrap px-2.5 py-2 font-display text-xs font-bold uppercase tracking-[0.18em] transition-colors",
                       active
                         ? "text-soft-gold"
-                        : "text-ink-soft/80 hover:text-cognac",
+                        : dark
+                          ? "text-ivory/85 hover:text-champagne"
+                          : "text-ink-soft/80 hover:text-cognac",
                       !item.live && "opacity-70",
                     )}
                   >
@@ -98,7 +104,12 @@ export function Navbar() {
 
           <button
             type="button"
-            className="flex h-11 w-11 items-center justify-center border border-[var(--line)] bg-paper/70 text-ink transition hover:border-soft-gold lg:hidden"
+            className={cn(
+              "flex h-11 w-11 items-center justify-center border transition hover:border-soft-gold lg:hidden",
+              dark
+                ? "border-ivory/30 bg-black/25 text-ivory backdrop-blur-sm"
+                : "border-[var(--line)] bg-paper/70 text-ink",
+            )}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}

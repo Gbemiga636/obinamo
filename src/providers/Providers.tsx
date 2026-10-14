@@ -26,9 +26,11 @@ function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { envelopeOpen } = useSaveDateGate();
   const isAdmin = pathname.startsWith("/admin");
+  const isGallery = pathname === "/gallery";
 
   const hideFooter =
     isAdmin ||
+    isGallery ||
     pathname === "/" ||
     (pathname.startsWith("/save-the-date") && !envelopeOpen);
 
@@ -83,7 +85,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
               </motion.div>
             ) : null}
           </AnimatePresence>
-          <MusicToggle />
+          {!isGallery ? <MusicToggle /> : null}
         </SmoothScrollProvider>
       </div>
     </>

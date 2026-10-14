@@ -334,7 +334,7 @@ export const navItems = [
   { label: "Home", href: "/", live: true },
   { label: "Travel/Hotels", href: "/travel", live: true },
   { label: "Schedule", href: "/schedule", live: true },
-  { label: "Gallery", href: "/gallery", live: false },
+  { label: "Gallery", href: "/gallery", live: true },
   { label: "RSVP", href: "/rsvp", live: true },
   { label: "Registry", href: "/registry", live: false },
   { label: "Things to Do/FAQs", href: "/faqs", live: true },

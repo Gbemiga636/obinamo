@@ -12,8 +12,18 @@ import {
   type MutableRefObject,
 } from "react";
 
+/** A video with its own soundtrack; while audible, ambient music pauses. */
+export type MediaChannel = {
+  id: string;
+  muted: boolean;
+  toggle: () => void;
+};
+
 type SoundContextValue = {
   muted: boolean;
+  /** Registered video soundtrack (hero film, gallery reels) */
+  media: MediaChannel | null;
+  registerMedia: (channel: MediaChannel | null) => void;
   unlocked: boolean;
   /** True after a user gesture primed the audio element */
   primed: boolean;
@@ -34,7 +44,7 @@ type SoundContextValue = {
   play: (name: SoundName) => void;
 };
 
-export type SoundName = "seal" | "paper" | "sparkle" | "type";
+export type SoundName = "seal" | "paper" | "sparkle" | "type" | "shutter";
 
 const SoundContext = createContext<SoundContextValue | null>(null);
 const STORAGE_KEY = "obinasom-sound-muted";
@@ -46,6 +56,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const [unlocked, setUnlocked] = useState(false);
   const [primed, setPrimed] = useState(false);
   const [awaitingGesture, setAwaitingGesture] = useState(false);
+  const [media, setMedia] = useState<MediaChannel | null>(null);
+  const suspendedRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const ctxRef = useRef<AudioContext | null>(null);
   const mutedRef = useRef(true);
@@ -55,6 +67,13 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     mutedRef.current = muted;
   }, [muted]);
+
+  const suspended = !!media && !media.muted;
+  suspendedRef.current = suspended;
+
+  const registerMedia = useCallback((channel: MediaChannel | null) => {
+    setMedia(channel);
+  }, []);
 
   useEffect(() => {
     setMuted(true);
@@ -165,6 +184,15 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const startExperienceAudio = useCallback(async () => {
     const audio = audioRef.current;
 
+    // A video soundtrack is playing — remember the preference, stay quiet
+    if (suspendedRef.current) {
+      mutedRef.current = false;
+      setMuted(false);
+      setUnlocked(true);
+      setAwaitingGesture(false);
+      return true;
+    }
+
     // Already playing steadily — don't re-prime (that caused dips)
     if (audio && !audio.paused && !mutedRef.current) {
       audio.volume = AMBIENT_VOLUME;
@@ -235,7 +263,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
 
   const play = useCallback(
     (name: SoundName) => {
-      if (mutedRef.current || typeof window === "undefined") return;
+      if (typeof window === "undefined") return;
+      if (mutedRef.current && name !== "shutter") return;
       setUnlocked(true);
 
       const ctx = ensureCtx();
@@ -245,6 +274,30 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       const now = ctx.currentTime;
       const gain = ctx.createGain();
       gain.connect(ctx.destination);
+
+      if (name === "shutter") {
+        if (ctx.state !== "running") return;
+        const length = Math.floor(ctx.sampleRate * 0.14);
+        const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < length; i++) {
+          const t = i / length;
+          const click = t < 0.08 || (t > 0.55 && t < 0.62) ? 1 : 0.25;
+          data[i] = (Math.random() * 2 - 1) * click * (1 - t);
+        }
+        const noise = ctx.createBufferSource();
+        noise.buffer = buffer;
+        const hp = ctx.createBiquadFilter();
+        hp.type = "highpass";
+        hp.frequency.value = 1800;
+        noise.connect(hp);
+        hp.connect(gain);
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+        noise.start(now);
+        noise.stop(now + 0.16);
+        return;
+      }
 
       const osc = ctx.createOscillator();
       const filter = ctx.createBiquadFilter();
@@ -298,6 +351,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       muted,
+      media,
+      registerMedia,
       unlocked,
       primed,
       awaitingGesture,
@@ -310,6 +365,8 @@ export function SoundProvider({ children }: { children: ReactNode }) {
     }),
     [
       muted,
+      media,
+      registerMedia,
       unlocked,
       primed,
       awaitingGesture,
@@ -324,7 +381,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
 
   return (
     <SoundContext.Provider value={value}>
-      <AmbientAudioBridge audioRef={audioRef} muted={muted} />
+      <AmbientAudioBridge
+        audioRef={audioRef}
+        muted={muted}
+        suspended={suspended}
+      />
       {children}
     </SoundContext.Provider>
   );
@@ -334,9 +395,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
 function AmbientAudioBridge({
   audioRef,
   muted,
+  suspended,
 }: {
   audioRef: MutableRefObject<HTMLAudioElement | null>;
   muted: boolean;
+  suspended: boolean;
 }) {
   useEffect(() => {
     const audio = audioRef.current;
@@ -348,13 +411,13 @@ function AmbientAudioBridge({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (muted) {
+    if (muted || suspended) {
       audio.pause();
       return;
     }
     audio.volume = AMBIENT_VOLUME;
     void audio.play().catch(() => undefined);
-  }, [muted, audioRef]);
+  }, [muted, suspended, audioRef]);
 
   return null;
 }
