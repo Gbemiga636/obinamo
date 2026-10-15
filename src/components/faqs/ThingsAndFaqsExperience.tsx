@@ -79,7 +79,7 @@ function FaqItem({
         aria-expanded={open}
         className="group flex w-full items-start gap-4 px-2 py-5 text-left sm:px-4"
       >
-        <span className="mt-0.5 font-display text-[11px] font-bold tracking-[0.2em] text-soft-gold">
+        <span className="mt-0.5 font-display text-[11px] font-bold tracking-[0.2em] text-gold-ink">
           {String(index + 1).padStart(2, "0")}
         </span>
         <span className="flex-1 font-display text-[15px] font-bold leading-snug tracking-[0.02em] text-mocha transition group-hover:text-cognac sm:text-base">
@@ -117,6 +117,8 @@ function FaqItem({
                 external ? (
                   <a
                     href={item.link.href}
+                    target="_blank"
+                    rel="noreferrer"
                     className="mt-4 inline-flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-cognac hover:text-mocha"
                   >
                     {item.link.label}
@@ -276,7 +278,7 @@ export function ThingsAndFaqsExperience() {
                       <h3 className="mt-6 font-display text-base font-bold uppercase leading-snug tracking-[0.08em] text-mocha">
                         {place.name}
                       </h3>
-                      <p className="mt-2 flex items-start justify-center gap-1.5 font-serif text-xs text-ink-soft/60">
+                      <p className="mt-2 flex items-start justify-center gap-1.5 font-serif text-xs text-ink-soft">
                         <MapPin className="mt-0.5 h-3 w-3 shrink-0 text-soft-gold" />
                         {place.address}
                       </p>
@@ -368,7 +370,7 @@ export function ThingsAndFaqsExperience() {
         className="relative overflow-hidden px-6 py-12 text-center sm:py-14"
         style={{
           background:
-            "linear-gradient(105deg, #5c3a1f 0%, #B67A3D 42%, #7a4a25 100%)",
+            "linear-gradient(105deg, #4f3119 0%, #8f5a2b 42%, #6b4020 100%)",
         }}
       >
         <div className="flex justify-center">

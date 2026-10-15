@@ -29,7 +29,7 @@ export function InvitationCard({ className = "" }: { className?: string }) {
 
       <div className="relative z-10 px-10 py-14 text-center sm:px-14 sm:py-16">
         <GoldFlourish />
-        <p className="type-eyebrow mt-6 text-[10px] text-soft-gold">
+        <p className="type-eyebrow mt-6 text-[10px] text-gold-ink">
           We are celebrating our
         </p>
         <p className="type-display mt-2 text-lg text-cognac sm:text-xl">
@@ -41,14 +41,14 @@ export function InvitationCard({ className = "" }: { className?: string }) {
         </div>
 
         <div className="mt-8">
-          <p className="type-eyebrow text-[10px] text-caramel">{wedding.bride.first}</p>
+          <p className="type-eyebrow text-[10px] text-caramel-ink">{wedding.bride.first}</p>
           <p className="type-script mt-1 text-[3.25rem] sm:text-[3.75rem]">
             {wedding.bride.last}
           </p>
-          <p className="my-1.5 font-display text-xl font-bold text-soft-gold">
+          <p className="my-1.5 font-display text-xl font-bold text-gold-ink">
             &amp;
           </p>
-          <p className="type-eyebrow text-[10px] text-caramel">{wedding.groom.first}</p>
+          <p className="type-eyebrow text-[10px] text-caramel-ink">{wedding.groom.first}</p>
           <p className="type-script mt-1 text-[3.25rem] sm:text-[3.75rem]">
             {wedding.groom.middle} {wedding.groom.last}
           </p>
@@ -68,7 +68,7 @@ export function InvitationCard({ className = "" }: { className?: string }) {
           <GoldFlourish className="rotate-180" />
         </div>
 
-        <p className="type-eyebrow mt-6 text-[10px] text-caramel/90">
+        <p className="type-eyebrow mt-6 text-[10px] text-caramel-ink/90">
           Formal invitation to follow
         </p>
       </div>

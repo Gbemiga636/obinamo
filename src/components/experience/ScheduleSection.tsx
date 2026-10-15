@@ -27,7 +27,7 @@ export function ScheduleSection() {
             variants={staggerItem}
             className="panel flex flex-col items-center gap-2 px-6 py-6 text-center sm:flex-row sm:justify-between sm:text-left"
           >
-            <p className="type-eyebrow shrink-0 text-[10px] text-soft-gold">
+            <p className="type-eyebrow shrink-0 text-[10px] text-gold-ink">
               {item.time}
             </p>
             <div className="sm:flex-1 sm:px-6">

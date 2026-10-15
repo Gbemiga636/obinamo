@@ -35,7 +35,7 @@ export function HeroFilm({
   onEnd: () => void;
 }) {
   const reduce = useReducedMotion();
-  const { registerMedia, play } = useSound();
+  const { registerMedia, play, rewindAmbient } = useSound();
   const rootRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const backdropRef = useRef<HTMLVideoElement>(null);
@@ -67,11 +67,19 @@ export function HeroFilm({
     if (!v) return;
     v.currentTime = 0;
     v.muted = false;
-    v.volume = 1;
+    v.volume = 0;
     if (await playSafely(v)) {
       setSoundOn(true);
+      const t0 = performance.now();
+      const rise = (t: number) => {
+        const k = Math.min(1, Math.max(0, (t - t0) / 1000));
+        v.volume = k;
+        if (k < 1) requestAnimationFrame(rise);
+      };
+      requestAnimationFrame(rise);
       return;
     }
+    v.volume = 1;
     v.muted = true;
     setSoundOn(false);
     setNeedsTap(true);
@@ -187,6 +195,7 @@ export function HeroFilm({
 
   const onEnded = () => {
     if (phase === "closing" || phase === "done") return;
+    rewindAmbient();
     setSoundOn(false);
     setNeedsTap(false);
     setPhase("closing");

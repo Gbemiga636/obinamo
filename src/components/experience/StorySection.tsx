@@ -44,7 +44,7 @@ export function StorySection() {
             />
 
             <motion.p
-              className="type-eyebrow text-[10px] text-soft-gold"
+              className="type-eyebrow text-[10px] text-gold-ink"
               initial={reduce ? false : { opacity: 0, x: i % 2 ? 20 : -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={viewportOnce}

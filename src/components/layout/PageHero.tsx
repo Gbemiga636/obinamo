@@ -97,7 +97,7 @@ export function PageHero({
           </motion.h1>
 
           <motion.p
-            className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.34em] text-caramel sm:text-xs"
+            className="mt-3 font-display text-[11px] font-bold uppercase tracking-[0.34em] text-caramel-ink sm:text-xs"
             {...rise(0.55)}
           >
             {subtitle}

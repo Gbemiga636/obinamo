@@ -43,15 +43,15 @@ export const wedding = {
     mapsEmbed:
       "https://maps.google.com/maps?q=The%20Pavilion%20Event%20Hub%2C%205390%20Peachtree%20Industrial%20Blvd%2C%20Norcross%2C%20GA%2030071&t=&z=15&ie=UTF8&iwloc=&output=embed",
   },
-  dressCode: "Traditional or Formal Attire",
+  dressCode: "Shades of Nude and Tan",
   dressNote:
-    "We'd love to see you in traditional attire if possible, but formal attire is also warmly welcome.",
+    "We kindly ask our guests to dress in shades of nude and tan, from soft sand and beige to warm caramel and tan.",
   dressPalette: [
-    { name: "Mocha", hex: "#3B2A1A" },
-    { name: "Cognac", hex: "#7A4A25" },
-    { name: "Blush", hex: "#E2C2B8" },
-    { name: "Dusty Blue", hex: "#6C7D8F" },
-    { name: "Champagne", hex: "#E8D5A3" },
+    { name: "Ivory Nude", hex: "#EAD7C3" },
+    { name: "Sand", hex: "#D9BFA0" },
+    { name: "Beige", hex: "#C8A98A" },
+    { name: "Caramel", hex: "#B08354" },
+    { name: "Tan", hex: "#9A6E45" },
   ],
   hashtag: "#Obinasom",
   rsvpDeadline: "October 20, 2026",
@@ -88,7 +88,7 @@ export const wedding = {
       id: "iba-nkwu",
       time: "4:00 PM",
       timeRange: "4:00 PM – 5:00 PM",
-      title: "Iba Nkwu Ceremony",
+      title: "Igba Nkwu Ceremony",
       detail:
         "Our traditional palm wine ceremony, honoring family, culture and the customs that bring us together.",
       startIso: "2026-11-20T16:00:00-05:00",
@@ -130,9 +130,9 @@ export const wedding = {
     checkOut: { weekday: "Sunday", day: "22", month: "Nov" },
     nights: 3,
     bookBy: {
-      long: "Tuesday, October 20, 2026",
-      short: "October 20",
-      iso: "2026-10-20T23:59:59-04:00",
+      long: "Tuesday, October 27, 2026",
+      short: "October 27",
+      iso: "2026-10-27T23:59:59-04:00",
     },
     airport: "Hartsfield–Jackson Atlanta International (ATL)",
     airportDistance: "about 30 miles from the hotel",
@@ -162,9 +162,9 @@ export const wedding = {
   ],
   registry: [
     {
-      name: "The Knot / Zola",
+      name: "Zola",
       detail: "A little something for our new home",
-      link: "#",
+      link: "https://www.zola.com/wedding/princessandvictor/registry",
     },
     {
       name: "Your Presence",
@@ -182,17 +182,17 @@ export const wedding = {
     {
       group: "The Big Day",
       q: "What time does the celebration start?",
-      a: "Our Iba Nkwu ceremony begins promptly at 4:00 PM, followed by cocktail hour at 5:00 PM and the reception from 6:00 PM until 11:00 PM. Come a little early so you don't miss a single moment!",
+      a: "Our Igba Nkwu ceremony begins promptly at 4:00 PM, followed by cocktail hour at 5:00 PM and the reception from 6:00 PM until 11:00 PM. Come a little early so you don't miss a single moment!",
     },
     {
       group: "The Big Day",
-      q: "What is Iba Nkwu?",
-      a: "Iba Nkwu, our traditional palm wine ceremony, is the heart of an Igbo wedding. The bride carries a cup of palm wine through the crowd in search of her groom, and when she finds him and he drinks, our families joyfully celebrate the union. Expect music, colour, dancing and so much love.",
+      q: "What is Igba Nkwu?",
+      a: "Igba Nkwu, our traditional palm wine ceremony, is the heart of an Igbo wedding. The bride carries a cup of palm wine through the crowd in search of her groom, and when she finds him and he drinks, our families joyfully celebrate the union. Expect music, colour, dancing and so much love.",
     },
     {
       group: "The Big Day",
       q: "What should I wear? Is there a dress code?",
-      a: "We'd love to see you in traditional attire if possible, as this is a celebration of our culture! Formal attire is also warmly welcome. We can't wait to celebrate in style with you.",
+      a: "Yes! Our dress code for guests is shades of nude and tan, think soft sand, beige, caramel and tan. We can't wait to see you glowing in these warm tones as we celebrate in style together.",
     },
     {
       group: "The Big Day",
@@ -228,12 +228,13 @@ export const wedding = {
     {
       group: "Guests & RSVP",
       q: "Do you have a gift registry?",
-      a: "Your presence is truly the greatest gift. Registry details will be shared soon on the Registry tab. We're so grateful for your love and thoughtfulness.",
+      a: "Your presence is truly the greatest gift. If you'd love to bless us with something more, our registry is on Zola. We're so grateful for your love and thoughtfulness.",
+      link: { href: "https://www.zola.com/wedding/princessandvictor/registry", label: "View our registry" },
     },
     {
       group: "Travel & Stay",
       q: "Are there any hotel recommendations or room blocks?",
-      a: "Yes! We have a room block at the Crowne Plaza Norcross, 6050 Peachtree Industrial Blvd, Norcross, GA 30071, from Thursday, November 19 to Sunday, November 22, 2026. Reservations close on Tuesday, October 20, 2026, so please book early.",
+      a: "Yes! We have a room block at the Crowne Plaza Norcross, 6050 Peachtree Industrial Blvd, Norcross, GA 30071, from Thursday, November 19 to Sunday, November 22, 2026. The room block ends on Tuesday, October 27, 2026, so please book early.",
       link: { href: "/travel", label: "Book your room" },
     },
     {
@@ -332,10 +333,11 @@ export const wedding = {
 
 export const navItems = [
   { label: "Home", href: "/", live: true },
+  { label: "Our Story", href: "/story", live: true },
   { label: "Travel/Hotels", href: "/travel", live: true },
   { label: "Schedule", href: "/schedule", live: true },
   { label: "Gallery", href: "/gallery", live: true },
   { label: "RSVP", href: "/rsvp", live: true },
-  { label: "Registry", href: "/registry", live: false },
+  { label: "Registry", href: "https://www.zola.com/wedding/princessandvictor/registry", live: true },
   { label: "Things to Do/FAQs", href: "/faqs", live: true },
 ] as const;

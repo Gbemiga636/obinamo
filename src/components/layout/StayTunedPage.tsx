@@ -45,7 +45,7 @@ export function StayTunedPage({ title }: { title?: string }) {
           <GoldHeartDivider />
         </div>
 
-        <p className="type-eyebrow text-[10px] text-caramel">
+        <p className="type-eyebrow text-[10px] text-caramel-ink">
           {wedding.date.display} · {wedding.venue.name}
         </p>
 

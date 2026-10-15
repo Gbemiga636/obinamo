@@ -25,7 +25,7 @@ export function RegistrySection() {
             />
             <p className="mt-4 font-serif text-xl font-semibold text-ink">{item.name}</p>
             <p className="mt-2 font-serif text-sm text-ink-soft/75">{item.detail}</p>
-            <span className="mt-4 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.22em] text-soft-gold opacity-0 transition group-hover:opacity-100">
+            <span className="mt-4 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.22em] text-gold-ink opacity-0 transition group-hover:opacity-100">
               View <ExternalLink className="h-3 w-3" />
             </span>
           </a>

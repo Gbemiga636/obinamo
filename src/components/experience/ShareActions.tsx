@@ -85,7 +85,7 @@ export function ShareActions() {
         </Float>
 
         <Reveal from="up" delay={0.2}>
-          <p className="mx-auto mt-4 max-w-md font-serif text-base text-blush/70">
+          <p className="mx-auto mt-4 max-w-md font-serif text-base text-blush">
             Keep the date close and invite the ones you love.
           </p>
         </Reveal>

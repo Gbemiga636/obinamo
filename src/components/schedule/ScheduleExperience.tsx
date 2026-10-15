@@ -30,7 +30,7 @@ const ICONS = {
 } as const;
 
 const NOTES: Partial<Record<keyof typeof ICONS, string>> = {
-  "iba-nkwu": "Traditional attire preferred · formal attire welcome",
+  "iba-nkwu": "Dress code: shades of nude and tan",
 };
 
 const couple = `${wedding.bride.first} & ${wedding.groom.first}`;
@@ -120,7 +120,7 @@ export function ScheduleExperience() {
               <p className="py-2 font-display text-[3rem] font-bold leading-none text-mocha">
                 20
               </p>
-              <p className="border-t border-soft-gold/30 py-1 font-display text-[9px] font-bold uppercase tracking-[0.28em] text-caramel">
+              <p className="border-t border-soft-gold/30 py-1 font-display text-[9px] font-bold uppercase tracking-[0.28em] text-caramel-ink">
                 Friday
               </p>
             </div>
@@ -220,12 +220,12 @@ export function ScheduleExperience() {
                     {item.detail}
                   </p>
                   {note ? (
-                    <p className="mt-3 font-serif text-sm italic text-caramel">
+                    <p className="mt-3 font-serif text-sm italic text-caramel-ink">
                       {note}
                     </p>
                   ) : null}
                   <p
-                    className={`mt-4 flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft/60 ${
+                    className={`mt-4 flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-ink-soft ${
                       right ? "" : "md:justify-end"
                     }`}
                   >
@@ -330,7 +330,7 @@ export function ScheduleExperience() {
         className="relative px-6 py-12 text-center sm:py-14"
         style={{
           background:
-            "linear-gradient(105deg, #5c3a1f 0%, #B67A3D 42%, #7a4a25 100%)",
+            "linear-gradient(105deg, #4f3119 0%, #8f5a2b 42%, #6b4020 100%)",
         }}
       >
         <motion.div {...inView()}>

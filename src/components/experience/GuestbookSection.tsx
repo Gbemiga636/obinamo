@@ -62,7 +62,7 @@ export function GuestbookSection() {
 
       <div className="mt-12 space-y-3 text-left">
         {wishes.length === 0 ? (
-          <p className="text-center font-serif text-ink-soft/50">
+          <p className="text-center font-serif text-ink-soft">
             Be the first to write in our memory book.
           </p>
         ) : (
@@ -76,7 +76,7 @@ export function GuestbookSection() {
               <p className="font-serif text-lg italic text-ink">
                 &ldquo;{w.note}&rdquo;
               </p>
-              <footer className="type-eyebrow mt-3 text-[10px] text-soft-gold">
+              <footer className="type-eyebrow mt-3 text-[10px] text-gold-ink">
                 — {w.name}
               </footer>
             </motion.blockquote>

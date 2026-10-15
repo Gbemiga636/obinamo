@@ -273,7 +273,7 @@ export function HeroSection() {
                     if (step < 4) setStep(4);
                   }}
                 >
-                  <p className="font-display text-[11px] font-bold uppercase tracking-[0.32em] text-caramel sm:text-xs">
+                  <p className="font-display text-[11px] font-bold uppercase tracking-[0.32em] text-caramel-ink sm:text-xs">
                     {wedding.bride.first}
                   </p>
                   <p className="type-script mt-1 text-[clamp(2.15rem,9.5vw,4.4rem)] leading-[0.95] sm:text-[clamp(2.6rem,11vw,4.4rem)]">
@@ -282,14 +282,14 @@ export function HeroSection() {
 
                   <div className="my-2 flex items-center justify-center gap-3">
                     <span className="h-px w-8 bg-gradient-to-r from-transparent to-soft-gold/70" />
-                    <span className="font-display text-2xl font-bold text-soft-gold">
+                    <span className="font-display text-2xl font-bold text-gold-ink">
                       &amp;
                     </span>
                     <GoldHeart size={12} />
                     <span className="h-px w-8 bg-gradient-to-l from-transparent to-soft-gold/70" />
                   </div>
 
-                  <p className="font-display text-[11px] font-bold uppercase tracking-[0.32em] text-caramel sm:text-xs">
+                  <p className="font-display text-[11px] font-bold uppercase tracking-[0.32em] text-caramel-ink sm:text-xs">
                     {wedding.groom.first}
                   </p>
                   <p className="type-script mt-1 text-[clamp(2.15rem,9.5vw,4.4rem)] leading-[0.95] sm:text-[clamp(2.6rem,11vw,4.4rem)]">
@@ -347,7 +347,7 @@ export function HeroSection() {
           className="relative px-6 py-9 text-center sm:py-11"
           style={{
             background:
-              "linear-gradient(105deg, #5c3a1f 0%, #B67A3D 42%, #7a4a25 100%)",
+              "linear-gradient(105deg, #4f3119 0%, #8f5a2b 42%, #6b4020 100%)",
           }}
         >
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

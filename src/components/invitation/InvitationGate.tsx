@@ -64,7 +64,7 @@ export function InvitationGate() {
         transition={{ duration: 0.9, delay: 0.15 }}
       >
         <p className="type-eyebrow text-dusty-blue">Hand-delivered for you</p>
-        <p className="mt-3 font-serif text-lg text-ink-soft/70">
+        <p className="mt-3 font-serif text-lg text-ink-soft">
           {wedding.bride.first} &amp; {wedding.groom.first}
         </p>
       </motion.div>
@@ -91,7 +91,7 @@ export function InvitationGate() {
             <button type="button" onClick={start} className="btn-primary min-w-[240px]">
               Start Experience
             </button>
-            <p className="font-serif text-sm text-ink-soft/55">
+            <p className="font-serif text-sm text-ink-soft">
               Open gently — music begins with you
             </p>
           </motion.div>
@@ -217,7 +217,7 @@ function LuxuryEnvelope({
             <p className="relative mt-2 font-script text-[1.7rem] leading-none text-cognac">
               {wedding.bride.first}
             </p>
-            <p className="relative my-0.5 font-display text-sm font-bold text-soft-gold">
+            <p className="relative my-0.5 font-display text-sm font-bold text-gold-ink">
               &amp;
             </p>
             <p className="relative font-script text-[1.7rem] leading-none text-cognac">

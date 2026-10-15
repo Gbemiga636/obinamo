@@ -10,11 +10,13 @@
   --mocha: #3b2a1a;
   --cognac: #7a4a25;
   --caramel: #b67a3d;
-  --dusty-blue: #6c7d8f;
+  --dusty-blue: #56677a;
   --blush: #e2c2b8;
   --gold: #c4a035;
   --gold-bright: #d4af37;
   --gold-mute: #a88b2e;
+  --gold-ink: #85651a;
+  --caramel-ink: #8a5727;
   --ivory: #f8f3eb;
   --cream: #f1e8db;
   --paper: #fbf8f2;
@@ -67,6 +69,8 @@
   --color-blush: var(--blush);
   --color-warm-gold: var(--gold);
   --color-soft-gold: var(--gold-bright);
+  --color-gold-ink: var(--gold-ink);
+  --color-caramel-ink: var(--caramel-ink);
   --color-soft-neutral: #e8dfd2;
   --color-ivory: var(--ivory);
   --color-cream: var(--cream);
@@ -157,41 +161,60 @@ html {
 /* ── Hero over film ── */
 .hero-copy .type-eyebrow,
 .hero-copy .type-script,
-.hero-copy .text-caramel {
+.hero-copy .text-caramel-ink,
+.hero-copy .text-gold-ink {
   transition:
     color 1.6s cubic-bezier(0.22, 1, 0.36, 1),
     text-shadow 1.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .hero-cinema .type-eyebrow {
-  color: #f3e7b4;
-  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.6);
+  color: #f6ecc4;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 14px rgba(0, 0, 0, 0.7);
 }
 
 .hero-cinema .type-script {
   color: #fffaf2;
-  text-shadow: 0 3px 26px rgba(0, 0, 0, 0.6);
+  text-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.7),
+    0 3px 26px rgba(0, 0, 0, 0.75);
 }
 
-.hero-cinema .text-caramel {
-  color: #f0d9a8;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.55);
+.hero-cinema .text-caramel-ink {
+  color: #f6e2b8;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 12px rgba(0, 0, 0, 0.7);
+}
+
+.hero-cinema .text-gold-ink {
+  color: #f3d77e;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.85),
+    0 1px 12px rgba(0, 0, 0, 0.7);
 }
 
 .hero-cinema .gold-foil {
-  filter: drop-shadow(0 3px 16px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 3px 16px rgba(0, 0, 0, 0.6));
 }
 
 .hero-cinema .hero-welcome {
   color: #fff;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.8),
+    0 1px 10px rgba(0, 0, 0, 0.6);
 }
 
 .hero-cinema .hero-headline {
   background: none;
   color: #fff;
   filter: none;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  text-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.7),
+    0 2px 14px rgba(0, 0, 0, 0.6);
 }
 
 /* ── Gallery wall ── */
@@ -303,11 +326,11 @@ body {
 .gold-foil {
   background: linear-gradient(
     120deg,
-    #8a6a1f 0%,
-    #d4af37 32%,
-    #f3e7b4 50%,
-    #d4af37 68%,
-    #8a6a1f 100%
+    #6b4c12 0%,
+    #93701d 32%,
+    #b8913a 50%,
+    #93701d 68%,
+    #6b4c12 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -321,7 +344,6 @@ body {
   letter-spacing: 0.32em;
   text-transform: uppercase;
   line-height: 1.4;
-  color: var(--cognac);
 }
 
 .type-display {
@@ -330,14 +352,12 @@ body {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   line-height: 1.1;
-  color: var(--cognac);
 }
 
 .type-script {
   font-family: var(--font-great-vibes), cursive;
   font-weight: 400;
   line-height: 1.05;
-  color: var(--ink);
 }
 
 .type-body {
@@ -345,7 +365,22 @@ body {
   font-weight: 500;
   font-size: 17px;
   line-height: 1.7;
-  color: var(--ink-soft);
+}
+
+/* Default type colours live in a layer so text-* utilities can override them */
+@layer components {
+  .type-eyebrow,
+  .type-display {
+    color: var(--cognac);
+  }
+
+  .type-script {
+    color: var(--ink);
+  }
+
+  .type-body {
+    color: var(--ink-soft);
+  }
 }
 
 /* legacy aliases used across components */

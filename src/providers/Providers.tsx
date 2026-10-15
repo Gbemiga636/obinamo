@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -14,6 +14,7 @@ import {
   useSaveDateGate,
 } from "@/providers/SaveDateGate";
 import { ExperienceLoader } from "@/components/invitation/ExperienceLoader";
+import { PasswordGate } from "@/components/invitation/PasswordGate";
 import { Navbar } from "@/components/layout/Navbar";
 import { MusicToggle } from "@/components/ui/MusicToggle";
 import { AmbientMusic } from "@/components/effects/AmbientMusic";
@@ -21,12 +22,30 @@ import { FallingPetals } from "@/components/effects/FallingPetals";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { easeSmooth } from "@/lib/motion";
 
+const ACCESS_KEY = "obinasom-access-v2";
+
 function AppShell({ children }: { children: React.ReactNode }) {
   const { ready, unlocked, completeUnlock } = useInvitation();
   const pathname = usePathname();
   const { envelopeOpen } = useSaveDateGate();
   const isAdmin = pathname.startsWith("/admin");
   const isGallery = pathname === "/gallery";
+  const [access, setAccess] = useState<"checking" | "locked" | "granted">("checking");
+
+  useEffect(() => {
+    let granted = false;
+    try {
+      granted = window.localStorage.getItem(ACCESS_KEY) === "granted";
+    } catch {}
+    setAccess(granted ? "granted" : "locked");
+  }, []);
+
+  const enterSite = () => {
+    try {
+      window.localStorage.setItem(ACCESS_KEY, "granted");
+    } catch {}
+    setAccess("granted");
+  };
 
   const hideFooter =
     isAdmin ||
@@ -56,6 +75,35 @@ function AppShell({ children }: { children: React.ReactNode }) {
     return <div className="relative min-h-screen">{children}</div>;
   }
 
+  if (access === "checking") {
+    return <div className="fixed inset-0 z-[100] bg-[#120b06]" />;
+  }
+
+  return (
+    <>
+      <AnimatePresence>
+        {access === "locked" ? <PasswordGate key="gate" onEnter={enterSite} /> : null}
+      </AnimatePresence>
+      {access === "granted" ? (
+        <SiteChrome hideFooter={hideFooter} isGallery={isGallery} unlocked={unlocked}>
+          {children}
+        </SiteChrome>
+      ) : null}
+    </>
+  );
+}
+
+function SiteChrome({
+  children,
+  hideFooter,
+  isGallery,
+  unlocked,
+}: {
+  children: React.ReactNode;
+  hideFooter: boolean;
+  isGallery: boolean;
+  unlocked: boolean;
+}) {
   return (
     <>
       <AmbientMusic />

@@ -34,6 +34,8 @@ type SoundContextValue = {
   primeAudio: () => Promise<void>;
   /** Pause ambient immediately (e.g. entering Save The Date) */
   pauseAmbient: () => void;
+  /** Start the song from the top when it next resumes (film shares the track) */
+  rewindAmbient: () => void;
   /**
    * Unmute + try to play ambient.
    * Returns true if playback started.
@@ -78,7 +80,7 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setMuted(true);
     mutedRef.current = true;
-    const audio = new Audio("/sounds/ambient.mp3");
+    const audio = new Audio("/sounds/first-time.mp3");
     audio.preload = "auto";
     audio.setAttribute("playsinline", "true");
     audio.setAttribute("webkit-playsinline", "true");
@@ -164,6 +166,11 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       audio.currentTime = 0;
       audio.volume = AMBIENT_VOLUME;
     }
+  }, []);
+
+  const rewindAmbient = useCallback(() => {
+    const audio = audioRef.current;
+    if (audio?.paused) audio.currentTime = 0;
   }, []);
 
   const toggleMuted = useCallback(() => {
@@ -359,11 +366,13 @@ export function SoundProvider({ children }: { children: ReactNode }) {
       toggleMuted,
       primeAudio,
       pauseAmbient,
+      rewindAmbient,
       startExperienceAudio,
       awaitGesturePlayback,
       play,
     }),
     [
+      rewindAmbient,
       muted,
       media,
       registerMedia,
@@ -408,15 +417,44 @@ function AmbientAudioBridge({
     audio.volume = AMBIENT_VOLUME;
   }, [audioRef]);
 
+  // Crossfade only at hand-offs with a film soundtrack; steady otherwise
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (muted || suspended) {
+    let raf = 0;
+    const fadeTo = (target: number, ms: number, done?: () => void) => {
+      const from = audio.volume;
+      const t0 = performance.now();
+      const step = (t: number) => {
+        const k = Math.min(1, Math.max(0, (t - t0) / ms));
+        audio.volume = Math.min(1, Math.max(0, from + (target - from) * k));
+        if (k < 1) raf = requestAnimationFrame(step);
+        else done?.();
+      };
+      raf = requestAnimationFrame(step);
+    };
+
+    if (muted) {
       audio.pause();
+      audio.volume = AMBIENT_VOLUME;
       return;
     }
-    audio.volume = AMBIENT_VOLUME;
+    if (suspended) {
+      if (audio.paused) return;
+      fadeTo(0, 450, () => audio.pause());
+      return () => cancelAnimationFrame(raf);
+    }
+    if (!audio.paused) {
+      audio.volume = AMBIENT_VOLUME;
+      return;
+    }
+    audio.volume = 0;
     void audio.play().catch(() => undefined);
+    fadeTo(AMBIENT_VOLUME, 1400);
+    return () => {
+      cancelAnimationFrame(raf);
+      audio.volume = AMBIENT_VOLUME;
+    };
   }, [muted, suspended, audioRef]);
 
   return null;

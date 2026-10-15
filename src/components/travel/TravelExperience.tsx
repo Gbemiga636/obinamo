@@ -178,7 +178,7 @@ export function TravelExperience() {
                 ].map((chip) => (
                   <span
                     key={chip}
-                    className="border border-soft-gold/35 bg-ivory/70 px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-caramel"
+                    className="border border-soft-gold/35 bg-ivory/70 px-3 py-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-caramel-ink"
                   >
                     {chip}
                   </span>
@@ -206,7 +206,7 @@ export function TravelExperience() {
                 <div className="flex flex-col items-center gap-1.5 px-1">
                   <span className="h-px w-8 bg-soft-gold/60 sm:w-10" />
                   <GoldDiamond />
-                  <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-caramel">
+                  <span className="font-display text-[9px] font-bold uppercase tracking-[0.2em] text-caramel-ink">
                     {hotel.nights} nights
                   </span>
                   <span className="h-px w-8 bg-soft-gold/60 sm:w-10" />
@@ -289,7 +289,7 @@ export function TravelExperience() {
                 <p className="relative mt-2 font-display text-lg font-bold uppercase leading-snug tracking-[0.06em] text-mocha">
                   {a.name}
                 </p>
-                <p className="relative mt-1 font-display text-[10px] font-bold uppercase tracking-[0.3em] text-caramel">
+                <p className="relative mt-1 font-display text-[10px] font-bold uppercase tracking-[0.3em] text-caramel-ink">
                   {a.code}
                 </p>
                 <p className="relative mx-auto mt-4 max-w-[36ch] font-serif text-[15px] leading-relaxed text-ink-soft/75">
@@ -403,7 +403,7 @@ export function TravelExperience() {
         className="relative px-6 py-12 text-center sm:py-14"
         style={{
           background:
-            "linear-gradient(105deg, #5c3a1f 0%, #B67A3D 42%, #7a4a25 100%)",
+            "linear-gradient(105deg, #4f3119 0%, #8f5a2b 42%, #6b4020 100%)",
         }}
       >
         <motion.div {...inView()}>

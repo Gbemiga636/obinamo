@@ -66,22 +66,27 @@ export function Navbar() {
             />
           </Link>
 
-          <ul className="hidden flex-1 items-center justify-center gap-1 lg:flex lg:gap-2">
+          <ul className="hidden flex-1 items-center justify-center gap-0.5 lg:flex xl:gap-2">
             {navItems.map((item) => {
               const isRoute = !item.href.includes("#");
               const active = isRoute && pathname === item.href;
+              const external = item.href.startsWith("http");
               return (
                 <li key={item.label}>
                   <Link
                     href={item.live ? item.href : "#"}
                     onClick={(e) => onNavClick(e, item)}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noreferrer" : undefined}
                     className={cn(
-                      "relative block whitespace-nowrap px-2.5 py-2 font-display text-xs font-bold uppercase tracking-[0.18em] transition-colors",
+                      "relative block whitespace-nowrap px-2 py-2 font-display text-xs font-bold uppercase tracking-[0.14em] transition-colors xl:px-2.5 xl:tracking-[0.18em]",
                       active
-                        ? "text-soft-gold"
+                        ? dark
+                          ? "text-soft-gold"
+                          : "text-gold-ink"
                         : dark
-                          ? "text-ivory/85 hover:text-champagne"
-                          : "text-ink-soft/80 hover:text-cognac",
+                          ? "text-ivory hover:text-champagne"
+                          : "text-ink-soft hover:text-cognac",
                       !item.live && "opacity-70",
                     )}
                   >
@@ -167,6 +172,8 @@ export function Navbar() {
                       <Link
                         href={item.live ? item.href : "#"}
                         onClick={(e) => onNavClick(e, item)}
+                        target={item.href.startsWith("http") ? "_blank" : undefined}
+                        rel={item.href.startsWith("http") ? "noreferrer" : undefined}
                         className="flex items-center justify-between border-b border-[var(--line)] py-4 font-display text-sm font-bold uppercase tracking-[0.22em] text-cognac transition hover:text-soft-gold"
                       >
                         <span>{item.label}</span>

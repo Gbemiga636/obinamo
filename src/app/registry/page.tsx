@@ -1,5 +1,5 @@
-import { StayTunedPage } from "@/components/layout/StayTunedPage";
+import { redirect } from "next/navigation";
 
 export default function RegistryPage() {
-  return <StayTunedPage title="Registry" />;
+  redirect("https://www.zola.com/wedding/princessandvictor/registry");
 }

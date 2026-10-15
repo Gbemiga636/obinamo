@@ -297,7 +297,7 @@ export function SaveTheDateExperience() {
               <Countdown />
             </div>
             <GuestDetailsForm />
-            <p className="mt-6 max-w-sm font-serif text-sm text-ink-soft/55">
+            <p className="mt-6 max-w-sm font-serif text-sm text-ink-soft">
               Formal invitation to follow · {wedding.hashtag}
             </p>
           </motion.div>

@@ -74,7 +74,7 @@ export function SiteFooter() {
             Obinasom
           </p>
 
-          <div className="mt-4 flex items-center gap-2.5 text-blush/80">
+          <div className="mt-4 flex items-center gap-2.5 text-blush">
             <span className="font-display text-xs font-semibold uppercase tracking-[0.28em]">
               {wedding.bride.first}
             </span>
@@ -84,7 +84,7 @@ export function SiteFooter() {
             </span>
           </div>
 
-          <p className="mt-3 max-w-md font-serif text-sm text-ivory/55">
+          <p className="mt-3 max-w-md font-serif text-sm text-ivory/85">
             {wedding.bride.display} &amp; {wedding.groom.display}
           </p>
 
@@ -103,10 +103,10 @@ export function SiteFooter() {
               <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-soft-gold/35 bg-cognac/30 text-soft-gold">
                 <Icon className="h-4 w-4" strokeWidth={1.6} />
               </span>
-              <p className="font-display text-[10px] font-bold uppercase tracking-[0.28em] text-blush/55">
+              <p className="font-display text-[10px] font-bold uppercase tracking-[0.28em] text-blush/90">
                 {label}
               </p>
-              <p className="mt-2 font-serif text-sm text-ivory/85">{value}</p>
+              <p className="mt-2 font-serif text-sm text-ivory">{value}</p>
             </div>
           ))}
         </div>
@@ -120,7 +120,9 @@ export function SiteFooter() {
             <Link
               key={item.href}
               href={item.href}
-              className="font-display text-[10px] font-bold uppercase tracking-[0.22em] text-champagne/55 transition hover:text-soft-gold"
+              target={item.href.startsWith("http") ? "_blank" : undefined}
+              rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+              className="font-display text-[10px] font-bold uppercase tracking-[0.22em] text-champagne/90 transition hover:text-soft-gold"
             >
               {item.label}
             </Link>
@@ -136,18 +138,18 @@ export function SiteFooter() {
             </span>
             <Heart className="h-3.5 w-3.5 fill-soft-gold/40" strokeWidth={1.6} />
           </div>
-          <p className="font-serif text-xs text-ivory/40">
+          <p className="font-serif text-xs text-ivory/75">
             Share your joy with our hashtag
           </p>
         </div>
 
         {/* Bottom bar */}
         <div className="mt-12 flex flex-col items-center gap-3 border-t border-soft-gold/15 pt-6 sm:flex-row sm:justify-between">
-          <p className="font-serif text-[11px] text-ivory/35">
+          <p className="font-serif text-[11px] text-ivory/70">
             With love · {year} · Made for forever
           </p>
-          <p className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-blush/40">
-            <Heart className="h-3 w-3 text-soft-gold/50" strokeWidth={1.5} />
+          <p className="flex items-center gap-1.5 font-display text-[10px] font-bold uppercase tracking-[0.2em] text-blush/75">
+            <Heart className="h-3 w-3 text-soft-gold/80" strokeWidth={1.5} />
             {wedding.monogram} · Obinasom
           </p>
         </div>
