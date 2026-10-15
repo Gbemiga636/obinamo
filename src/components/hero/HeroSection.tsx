@@ -19,6 +19,7 @@ import { LogoMark } from "@/components/ui/LogoMark";
 import { useInvitation } from "@/providers/InvitationProvider";
 import { wedding } from "@/lib/wedding";
 import { easeSmooth, softSpring } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 const FLOATING = [
   { kind: "heart" as const, size: 14, x: "8%", y: "22%", delay: 1.2, dur: 7.5 },
@@ -37,8 +38,15 @@ export function HeroSection() {
   const [step, setStep] = useState(0);
   const [cinema, setCinema] = useState(false);
   const archRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const coupleRef = useRef<HTMLDivElement>(null);
+  const [coupleFit, setCoupleFit] = useState({ y: 0, scale: 1 });
   const reduce = useReducedMotion();
   const { unlocked } = useInvitation();
+  const filmFade = cn(
+    "transition-[opacity,filter] duration-[1400ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+    cinema && "opacity-0 blur-[6px]",
+  );
 
   useEffect(() => {
     if (!unlocked) {
@@ -48,8 +56,47 @@ export function HeroSection() {
     setStep(reduce ? 4 : 0);
   }, [unlocked, reduce]);
 
+  // While the film plays, drop the names into the blurred space below the
+  // letterboxed frame (phones); laptops have no room there, so nothing moves.
+  useEffect(() => {
+    if (!cinema) {
+      setCoupleFit({ y: 0, scale: 1 });
+      return;
+    }
+    const fit = () => {
+      const section = sectionRef.current;
+      const couple = coupleRef.current;
+      const box = section?.querySelector<HTMLElement>("[data-film-box]");
+      const band = document.getElementById("welcome");
+      if (!section || !couple || !box || !band) return;
+      const video = box.querySelector("video");
+      const s = section.getBoundingClientRect();
+      const b = box.getBoundingClientRect();
+      const ratio = video?.videoWidth ? video.videoHeight / video.videoWidth : 9 / 16;
+      const frameH = Math.min(b.height, b.width * ratio);
+      const frameBottom = b.top - s.top + (b.height + frameH) / 2;
+      const floor = Math.min(band.getBoundingClientRect().top, b.bottom) - s.top - 12;
+      const c = couple.getBoundingClientRect();
+      const top = c.top - s.top;
+      const targetTop = frameBottom + 14;
+      const room = floor - targetTop;
+      if (targetTop <= top || room < c.height * 0.6) {
+        setCoupleFit({ y: 0, scale: 1 });
+        return;
+      }
+      setCoupleFit({ y: targetTop - top, scale: Math.min(1, room / c.height) });
+    };
+    fit();
+    const t = window.setTimeout(fit, 700);
+    window.addEventListener("resize", fit);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("resize", fit);
+    };
+  }, [cinema]);
+
   return (
-    <section className="relative flex min-h-[100svh] flex-col overflow-x-clip">
+    <section ref={sectionRef} className="relative flex min-h-[100svh] flex-col overflow-x-clip">
       <div className="surface-paper absolute inset-0" />
       <div className="surface-grain absolute inset-0 opacity-40" />
 
@@ -65,12 +112,16 @@ export function HeroSection() {
         start={unlocked && (step >= 4 || !!reduce)}
         anchorRef={archRef}
         onReveal={() => setCinema(true)}
+        onEnd={() => setCinema(false)}
       />
 
       {/* Soft ambient floats — CSS so they don’t fight scroll */}
       {unlocked && !reduce ? (
         <div
-          className="pointer-events-none absolute inset-0 z-[12] hidden sm:block"
+          className={cn(
+            "pointer-events-none absolute inset-0 z-[12] hidden sm:block",
+            filmFade,
+          )}
           aria-hidden
         >
           {FLOATING.map((item, i) => (
@@ -112,7 +163,7 @@ export function HeroSection() {
           {/* Mobile/sm unchanged; laptop+ matches sample’s tall, roomy arch */}
           <div
             ref={archRef}
-            className="pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0 lg:-inset-x-24 lg:-top-14 lg:bottom-[-2.75rem] xl:-inset-x-32 xl:-top-16 xl:bottom-[-3.25rem]">
+            className={cn(filmFade, "pointer-events-none absolute -inset-x-1 -top-2 bottom-[-8px] sm:-inset-x-6 sm:-top-6 sm:bottom-0 lg:-inset-x-24 lg:-top-14 lg:bottom-[-2.75rem] xl:-inset-x-32 xl:-top-16 xl:bottom-[-3.25rem]")}>
             <GoldArch className="h-full w-full max-w-none scale-x-[1.08] opacity-90 sm:scale-x-100 lg:scale-x-[1.02]" />
           </div>
 
@@ -125,7 +176,7 @@ export function HeroSection() {
               }
               transition={{ ...softSpring, delay: unlocked ? 0.15 : 0 }}
             >
-              <div className="rounded-full border border-soft-gold/45 bg-paper/80 p-1 shadow-[var(--shadow-md)]">
+              <div className={cn(filmFade, "rounded-full border border-soft-gold/45 bg-paper/80 p-1 shadow-[var(--shadow-md)]")}>
                 <LogoMark
                   size={52}
                   className="h-12 w-12 sm:h-14 sm:w-14"
@@ -139,10 +190,12 @@ export function HeroSection() {
               animate={unlocked ? { opacity: 0.85 } : { opacity: 0 }}
               transition={{ duration: 1.2, delay: 0.35, ease: easeSmooth }}
             >
-              <LoveBurst className="mb-4" />
+              <div className={filmFade}>
+                <LoveBurst className="mb-4" />
+              </div>
             </motion.div>
 
-            <div className="min-h-[18px]">
+            <div className={cn("min-h-[18px]", filmFade)}>
               {reduce ? (
                 <p className="hero-welcome type-eyebrow">Welcome to our</p>
               ) : unlocked ? (
@@ -164,7 +217,7 @@ export function HeroSection() {
               )}
             </div>
 
-            <div className="mt-2 min-h-[70px] sm:min-h-[88px]">
+            <div className={cn("mt-2 min-h-[70px] sm:min-h-[88px]", filmFade)}>
               {reduce ? (
                 <h1 className="hero-headline type-display gold-foil text-[clamp(1.75rem,7vw,3.35rem)] sm:text-[clamp(2rem,7.5vw,3.35rem)]">
                   Wedding Website
@@ -195,11 +248,20 @@ export function HeroSection() {
                     if (step < 3) setStep(3);
                   }}
                 >
-                  <GoldFlourish />
+                  <div className={filmFade}>
+                    <GoldFlourish />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
 
+            <div ref={coupleRef}>
+            <motion.div
+              initial={false}
+              animate={{ y: coupleFit.y, scale: coupleFit.scale }}
+              transition={{ duration: 1.4, ease: easeSmooth }}
+              style={{ transformOrigin: "50% 0%" }}
+            >
             <AnimatePresence>
               {(step >= 3 || reduce) && (
                 <motion.div
@@ -249,6 +311,8 @@ export function HeroSection() {
                 </motion.div>
               )}
             </AnimatePresence>
+            </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -258,12 +322,14 @@ export function HeroSection() {
         introDelay={0.35}
         tuckBehindBand
         active={unlocked}
+        className={filmFade}
       />
       <FloralSide
         side="right"
         introDelay={0.55}
         tuckBehindBand
         active={unlocked}
+        className={filmFade}
       />
 
       <motion.div

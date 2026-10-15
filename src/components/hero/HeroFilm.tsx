@@ -8,7 +8,7 @@ import { setNavDark } from "@/lib/navTheme";
 const FILM = "/media/film.mp4";
 const POSTER = "/media/stills/film-poster.jpg";
 
-type Phase = "idle" | "drop" | "reveal" | "film";
+type Phase = "idle" | "drop" | "reveal" | "film" | "closing" | "done";
 
 /** iOS can leave play() pending forever — never await it bare. */
 function playSafely(video: HTMLVideoElement, ms = 1500) {
@@ -20,16 +20,19 @@ function playSafely(video: HTMLVideoElement, ms = 1500) {
 
 /**
  * A drop of liquid gold falls onto the arch's finial; its ripple opens a
- * window onto the pre-wedding film, which then fills the hero.
+ * window onto the pre-wedding film, which then fills the hero. When the film
+ * ends, the window closes back into the finial and the hero returns.
  */
 export function HeroFilm({
   start,
   anchorRef,
   onReveal,
+  onEnd,
 }: {
   start: boolean;
   anchorRef: RefObject<HTMLElement | null>;
   onReveal: () => void;
+  onEnd: () => void;
 }) {
   const reduce = useReducedMotion();
   const { registerMedia, play } = useSound();
@@ -41,9 +44,10 @@ export function HeroFilm({
   const impacted = useRef(false);
   const [soundOn, setSoundOn] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
-  const firstPass = useRef(true);
   const onRevealRef = useRef(onReveal);
   onRevealRef.current = onReveal;
+  const onEndRef = useRef(onEnd);
+  onEndRef.current = onEnd;
 
   const measure = useCallback(() => {
     const root = rootRef.current;
@@ -70,7 +74,7 @@ export function HeroFilm({
     }
     v.muted = true;
     setSoundOn(false);
-    setNeedsTap(firstPass.current);
+    setNeedsTap(true);
     void playSafely(v);
   }, []);
 
@@ -111,7 +115,7 @@ export function HeroFilm({
     if (!needsTap) return;
     const unlock = () => {
       const v = videoRef.current;
-      if (!v || !firstPass.current) return;
+      if (!v || v.ended) return;
       v.muted = false;
       void playSafely(v);
       setSoundOn(true);
@@ -141,6 +145,7 @@ export function HeroFilm({
   }, []);
 
   const active = phase === "reveal" || phase === "film";
+  const showing = active || phase === "closing";
 
   // Film soundtrack takes over from ambient music while audible
   useEffect(() => {
@@ -148,13 +153,17 @@ export function HeroFilm({
     registerMedia({ id: "hero-film", muted: !soundOn, toggle: toggleSound });
   }, [active, soundOn, toggleSound, registerMedia]);
 
+  useEffect(() => {
+    if (phase === "closing" || phase === "done") registerMedia(null);
+  }, [phase, registerMedia]);
+
   useEffect(() => () => registerMedia(null), [registerMedia]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!showing) return;
     setNavDark(true);
     return () => setNavDark(false);
-  }, [active]);
+  }, [showing]);
 
   useEffect(() => {
     if (phase === "idle") return;
@@ -177,16 +186,16 @@ export function HeroFilm({
   }, [active]);
 
   const onEnded = () => {
-    const v = videoRef.current;
-    if (!v) return;
-    // Play once with sound, then loop silently and hand music back
-    firstPass.current = false;
-    v.muted = true;
-    v.loop = true;
+    if (phase === "closing" || phase === "done") return;
     setSoundOn(false);
     setNeedsTap(false);
-    v.currentTime = 0;
-    void playSafely(v);
+    setPhase("closing");
+    play("sparkle");
+    onEndRef.current();
+    window.setTimeout(() => {
+      setPhase("done");
+      backdropRef.current?.pause();
+    }, reduce ? 900 : 2400);
   };
 
   const { x, y, r, band } = origin;
@@ -199,16 +208,18 @@ export function HeroFilm({
         className="absolute inset-0 overflow-hidden"
         initial={false}
         animate={
-          phase === "idle" || phase === "drop"
-            ? { clipPath: `circle(0px at ${x}px ${y}px)` }
-            : { clipPath: `circle(${r}px at ${x}px ${y}px)` }
+          showing
+            ? { clipPath: `circle(${phase === "closing" ? 0 : r}px at ${x}px ${y}px)` }
+            : { clipPath: `circle(0px at ${x}px ${y}px)` }
         }
         transition={
           phase === "reveal"
             ? { duration: 2.2, ease: [0.65, 0, 0.25, 1] }
-            : { duration: reduce ? 0.8 : 0 }
+            : phase === "closing"
+              ? { duration: reduce ? 0.8 : 2.2, ease: [0.7, 0, 0.3, 1] }
+              : { duration: reduce ? 0.8 : 0 }
         }
-        style={{ visibility: phase === "idle" ? "hidden" : "visible" }}
+        style={{ visibility: phase === "idle" || phase === "done" ? "hidden" : "visible" }}
       >
         {/* Blurred copy fills the space around the full frame */}
         <video
@@ -223,6 +234,7 @@ export function HeroFilm({
           className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl brightness-[0.45] saturate-[1.2]"
         />
         <div
+          data-film-box
           className="absolute inset-x-0 top-0"
           style={{ height: `min(100svh, calc(100% - ${band}px))` }}
         >
@@ -241,7 +253,7 @@ export function HeroFilm({
             }}
             className="absolute inset-0 h-full w-full object-contain"
             initial={false}
-            animate={{ scale: active ? 1 : 1.18 }}
+            animate={{ scale: phase === "closing" ? 1.12 : active ? 1 : 1.18 }}
             transition={{ duration: 3.2, ease: [0.22, 1, 0.36, 1] }}
           />
         </div>
@@ -273,6 +285,33 @@ export function HeroFilm({
           animate={{ scale: 1, opacity: [1, 1, 0] }}
           transition={{ duration: 2.2, ease: [0.65, 0, 0.25, 1] }}
         />
+      ) : null}
+
+      {/* …and drawing it back into the finial */}
+      {phase === "closing" && !reduce ? (
+        <>
+          <motion.span
+            className="absolute rounded-full border-2 border-[#f0d58a]"
+            style={{
+              left: x - r,
+              top: y - r,
+              width: r * 2,
+              height: r * 2,
+              boxShadow:
+                "0 0 30px 6px rgba(212,175,55,0.55), inset 0 0 30px 6px rgba(212,175,55,0.4)",
+            }}
+            initial={{ scale: 1, opacity: 0 }}
+            animate={{ scale: 0, opacity: [0, 1, 1, 0] }}
+            transition={{ duration: 2.2, ease: [0.7, 0, 0.3, 1], times: [0, 0.15, 0.85, 1] }}
+          />
+          <motion.span
+            className="absolute h-16 w-16 rounded-full bg-[radial-gradient(circle,rgba(255,246,214,1),rgba(240,213,138,0.6)_35%,transparent_70%)]"
+            style={{ left: x - 32, top: y - 32 }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 2.4, 0], opacity: [0, 1, 0] }}
+            transition={{ duration: 0.9, delay: 1.9, ease: "easeOut" }}
+          />
+        </>
       ) : null}
 
       {/* Ripples */}
