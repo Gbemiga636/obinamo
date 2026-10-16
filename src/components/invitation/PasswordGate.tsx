@@ -34,37 +34,10 @@ const DENIED_LINES = [
 ];
 
 function KeyholeSeal({ status }: { status: Status }) {
-  const reduce = useReducedMotion();
   const granted = status === "granted";
 
   return (
     <div className="relative mx-auto h-[150px] w-[150px] sm:h-[168px] sm:w-[168px]">
-      {/* revolving motto */}
-      <motion.svg
-        viewBox="0 0 160 160"
-        className="absolute inset-0 h-full w-full"
-        animate={reduce ? undefined : { rotate: 360 }}
-        transition={{
-          duration: status === "checking" ? 4 : 32,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      >
-        <defs>
-          <path id="gate-ring" d="M80,80 m-64,0 a64,64 0 1,1 128,0 a64,64 0 1,1 -128,0" />
-        </defs>
-        <text
-          className="fill-[#e9cf86]"
-          style={{ fontSize: 9.5, letterSpacing: 2.2, fontWeight: 700 }}
-        >
-          <textPath href="#gate-ring" textLength={400} lengthAdjust="spacing">
-            {granted
-              ? "WELCOME · WELCOME · WELCOME · WELCOME · "
-              : "IF YOU KNOW · YOU KNOW · IF YOU KNOW · YOU KNOW · "}
-          </textPath>
-        </text>
-      </motion.svg>
-
       {/* medallion */}
       <motion.div
         className={cn(
@@ -311,7 +284,7 @@ export function PasswordGate({ onEnter }: { onEnter: () => void }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.9 }}
             >
-              You know. Come on in, we&apos;ve been waiting for you.
+              Come on in, we&apos;ve been waiting for you.
             </motion.p>
           ) : (
             <motion.form
@@ -324,9 +297,6 @@ export function PasswordGate({ onEnter }: { onEnter: () => void }) {
               transition={{ duration: 0.8, delay: 0.55, ease: easeSmooth }}
             >
               <p className="font-serif text-base italic text-ivory sm:text-lg">
-                If you know, you know.
-              </p>
-              <p className="mt-1 font-serif text-sm text-ivory/85">
                 Enter the password from your invitation to step inside.
               </p>
 
